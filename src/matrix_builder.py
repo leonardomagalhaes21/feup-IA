@@ -11,6 +11,7 @@ class MatrixBuilder:
         self.guests = []
         self.relationship_matrix = None
         self.guest_index = {}  # Maps guest names to indices
+        self.guest_details = {}  # Maps guest names to their characteristics
 
         self.likes = set()
         self.dislikes = set()
@@ -21,6 +22,13 @@ class MatrixBuilder:
             df = pd.read_csv(self.guest_file, sep=';')
             self.guests = df['Guest'].tolist()
             self.guest_index = {name: i for i, name in enumerate(self.guests)}
+
+            for _, row in df.iterrows():
+                self.guest_details[row['Guest']] = {
+                    'Age': int(row['Age']),
+                    'Group': row['Group'],
+                    'Interests': row['Interests']
+                }
 
         except FileNotFoundError:
             print(f"Error: {self.guest_file} not found.")
@@ -43,14 +51,34 @@ class MatrixBuilder:
         self.relationship_matrix = np.zeros((size, size), dtype=int)
 
     def calculate_relationship_value(self, person1, person2):
-        #TODO: Add aditional logic to calculate the relationship value
+        details1 = self.guest_details.get(person1, {})
+        details2 = self.guest_details.get(person2, {})
+
+        score = 0
 
         if (person1, person2) in self.likes:
-            return 1
+            score += 3
         elif (person1, person2) in self.dislikes:
-            return -1
-        else:
-            return 0
+            score -= 3
+        
+        if details1 and details2:
+
+            # Handle age difference
+            age_diff = abs(details1['Age'] - details2['Age'])
+            if age_diff <= 5:
+                score += 1
+            elif age_diff > 15:
+                score -= 1
+
+            # Handle group
+            if details1['Group'] == details2['Group']:
+                score += 1
+
+            # Handle interests
+            if details1['Interests'] == details2['Interests']:
+                score += 1
+
+        return score
 
     def load_relationships(self):
         """Iterates through the matrix and fills in values using calculate_relationship_value."""
