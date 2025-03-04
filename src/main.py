@@ -14,6 +14,3 @@ print("\nRelationship Matrix:")
 print(pd.DataFrame(data["relationship_matrix"], index=data["guests"], columns=data["guests"]))
 
 builder.save_matrix_to_csv("relationship_matrix.csv")
-
-
-
