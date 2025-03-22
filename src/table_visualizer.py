@@ -1,15 +1,20 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+from matplotlib.patches import Circle
 
 class TableVisualizer:
-    def __init__(self, tables, tables_per_page=4):
+    def __init__(self, tables, tables_per_page=4, relationship_matrix=None, guests=None):
         """
         tables: list of tables, where each table is a list of guest names.
         tables_per_page: number of tables to display per page.
+        relationship_matrix: matrix indicating relationships between guests.
+        guests: list of all guests.
         """
         self.tables = tables
         self.tables_per_page = tables_per_page
+        self.relationship_matrix = relationship_matrix
+        self.guests = guests
         # Split the tables into pages.
         n_tables = len(tables)
         self.pages = [tables[i:i+tables_per_page] for i in range(0, n_tables, tables_per_page)]
@@ -49,15 +54,42 @@ class TableVisualizer:
             font_size = max(8, 14 - num_seats // 3)
             text_offset = 2.0
 
+            guest_positions = []
             for angle, guest in zip(angles, table):
                 # Draw the seat marker.
                 seat_x, seat_y = np.cos(angle) * 1.5, np.sin(angle) * 1.5
                 seat_marker = plt.Circle((seat_x, seat_y), 0.1, color='orange')
                 ax.add_artist(seat_marker)
+                guest_positions.append((seat_x, seat_y))
                 # Draw guest name.
                 text_x, text_y = np.cos(angle) * text_offset, np.sin(angle) * text_offset
                 ax.text(text_x, text_y, guest, ha='center', va='center', fontsize=font_size, wrap=True)
             
+            # Draw relationship lines between guests if relationship_matrix is provided
+            if self.relationship_matrix is not None and self.guests is not None:
+                for i, guest1 in enumerate(table):
+                    guest1_idx = self.guests.index(guest1)
+                    for j, guest2 in enumerate(table):
+                        if i < j:  # Only process each pair once
+                            guest2_idx = self.guests.index(guest2)
+                            relationship = self.relationship_matrix[guest1_idx][guest2_idx]
+                            
+                            # Determine line color based on relationship value
+                            if relationship > 0:
+                                color = 'green'  # Positive relationship
+                                linewidth = min(relationship / 2, 3)  # Adjust thickness based on strength
+                            elif relationship < 0:
+                                color = 'red'  # Negative relationship
+                                linewidth = min(abs(relationship) / 2, 3)  # Adjust thickness based on strength
+                            else:
+                                color = 'white'  # Neutral relationship
+                                linewidth = 1
+                            
+                            # Draw line between guests
+                            x1, y1 = guest_positions[i]
+                            x2, y2 = guest_positions[j]
+                            ax.plot([x1, x2], [y1, y2], color=color, linewidth=linewidth, alpha=0.7)
+
             table_num = idx + 1 + page_idx * self.tables_per_page
             ax.set_title(f"Table {table_num}", fontsize=14)
         
