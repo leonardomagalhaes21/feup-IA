@@ -25,8 +25,6 @@ class Menu:
         self.entry_table_size = tk.Entry(self.root)
         self.entry_table_size.insert(0, "8")
         self.entry_table_size.grid(row=0, column=1, padx=10, pady=10)
-
-        # Remove the arrangement type combo box that only has "Random" option
         
         # display option
         lbl_display = tk.Label(self.root, text="Display Option:")
