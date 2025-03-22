@@ -452,6 +452,7 @@ class Menu:
             happiness_scores = []
             execution_times = []
             names = []
+            tables_solutions = []  # Store the table assignments for each algorithm
             
             # Run each algorithm and record performance
             for name, algorithm in algorithms:
@@ -459,9 +460,12 @@ class Menu:
                     start_time = time.time()
                     tables, happiness = algorithm()
                     end_time = time.time()
+                    
                     happiness_scores.append(happiness)
                     execution_times.append(end_time - start_time)
                     names.append(name)
+                    tables_solutions.append(tables)  # Store the table assignments
+                    
                     print(f"{name}: Happiness={happiness:.2f}, Time={end_time-start_time:.2f}s")
                 except Exception as e:
                     print(f"Error with {name}: {str(e)}")
@@ -472,13 +476,33 @@ class Menu:
                 messagebox.showerror("Error", "No successful algorithm runs to display.")
                 return
                 
-            # Create a new window for charts
+            # Create a new window for charts and make it full screen
             chart_window = tk.Toplevel(self.root)
             chart_window.title("Algorithm Performance Comparison")
-            chart_window.geometry("800x600")
             
-            # Create figure with two subplots
-            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+            # Make the window full screen
+            screen_width = chart_window.winfo_screenwidth()
+            screen_height = chart_window.winfo_screenheight()
+            chart_window.geometry(f"{screen_width}x{screen_height}+0+0")
+            
+            # Create a toolbar frame at the top for the save button
+            toolbar_frame = ttk.Frame(chart_window)
+            toolbar_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=5)
+            
+            # Add a more prominent save button
+            save_button = ttk.Button(
+                toolbar_frame,
+                text="SAVE RESULTS",
+                command=lambda: self.save_comparison_results(names, happiness_scores, execution_times, tables_solutions)
+            )
+            save_button.pack(side=tk.LEFT, padx=10, pady=5)
+            
+            # Create a frame for the chart itself
+            chart_frame = ttk.Frame(chart_window)
+            chart_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=10, pady=5)
+            
+            # Create figure with two subplots - make it larger for full screen
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 10))
             
             # Plot happiness scores
             x = np.arange(len(names))
@@ -508,36 +532,97 @@ class Menu:
             
             # Adjust layout and embed in tkinter
             plt.tight_layout()
-            canvas = FigureCanvasTkAgg(fig, master=chart_window)
+            canvas = FigureCanvasTkAgg(fig, master=chart_frame)
             canvas.draw()
             canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-            
-            # Save results button
-            ttk.Button(
-                chart_window,
-                text="Save Results",
-                command=lambda: self.save_comparison_results(names, happiness_scores, execution_times)
-            ).pack(pady=10)
             
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred during comparison: {str(e)}")
             print(f"Comparison error: {str(e)}")
     
-    def save_comparison_results(self, names, happiness_scores, execution_times):
-        """Saves the comparison results to a file."""
+    def save_comparison_results(self, names, happiness_scores, execution_times, tables=None):
+        """Saves the comparison results to a file with detailed information."""
         try:
-            from datetime import datetime
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"algorithm_comparison_{timestamp}.txt"
+            import os
             
-            with open(filename, "w") as f:
+            # Create results directory if it doesn't exist
+            results_dir = "results"
+            if not os.path.exists(results_dir):
+                os.makedirs(results_dir)
+            
+            # Create main comparison file - simplified name without timestamp
+            main_filename = os.path.join(results_dir, "algorithm_comparison.txt")
+            
+            with open(main_filename, "w") as f:
                 f.write("Algorithm Comparison Results\n")
                 f.write("===========================\n\n")
-                f.write("Algorithm\tHappiness\tTime (s)\n")
-                f.write("===========================\n\n")
+                
+                # Write table size information
+                table_size = int(self.entry_table_size.get()) if hasattr(self, 'entry_table_size') else 8
+                f.write(f"Table Size: {table_size}\n")
+                
+                # Get number of guests if available
+                num_guests = "N/A"
+                if hasattr(self, 'guests') and self.guests:
+                    num_guests = len(self.guests)
+                elif tables and tables[0]:
+                    # Count total unique guests across all tables in the first solution
+                    all_guests = set()
+                    for table in tables[0]:
+                        all_guests.update(table)
+                    num_guests = len(all_guests)
+                    
+                f.write(f"Number of Guests: {num_guests}\n\n")
+                
+                # Write dataset information
+                f.write("Dataset Information:\n")
+                f.write(f"  Guest List: {self.guestlist_path.get()}\n")
+                f.write(f"  Likes: {self.likes_path.get()}\n")
+                f.write(f"  Dislikes: {self.dislikes_path.get()}\n\n")
+                
+                # Write algorithm results table
+                f.write("Results Summary:\n")
+                f.write("------------------------------------------------------------------------------------\n")
+                f.write("Algorithm               | Happiness Score | Execution Time (s) | Solution File\n")
+                f.write("------------------------------------------------------------------------------------\n")
+                
+                # For each algorithm, write its results and create a solution file
                 for i, name in enumerate(names):
-                    f.write(f"{name}\t{happiness_scores[i]:.2f}\t{execution_times[i]:.2f}\n")
+                    # Create solution file with simplified name for this algorithm
+                    solution_filename = f"solution_{name.replace(' ', '_').lower()}.txt"
+                    solution_path = os.path.join(results_dir, solution_filename)
+                    
+                    # Format the result row with proper spacing for table-like format
+                    f.write(f"{name: <25}| {happiness_scores[i]:14.2f} | {execution_times[i]:16.2f} | {solution_filename}\n")
+                    
+                    # Skip solution file if we don't have table assignments
+                    if tables is None or i >= len(tables):
+                        continue
+                        
+                    # Write detailed solution to the solution file
+                    with open(solution_path, "w") as sol_file:
+                        sol_file.write(f"Solution for {name} Algorithm\n")
+                        sol_file.write("===============================\n\n")
+                        sol_file.write(f"Happiness Score: {happiness_scores[i]:.2f}\n")
+                        sol_file.write(f"Execution Time: {execution_times[i]:.2f} seconds\n\n")
+                        sol_file.write("Table Assignments:\n\n")
+                        
+                        for table_idx, table in enumerate(tables[i]):
+                            sol_file.write(f"Table {table_idx + 1}: {', '.join(table)}\n")
+                
+                f.write("------------------------------------------------------------------------------------\n\n")
+                
+                # Add a conclusion section highlighting the best algorithm
+                best_idx = happiness_scores.index(max(happiness_scores))
+                fastest_idx = execution_times.index(min(execution_times))
+                
+                f.write("Conclusion:\n")
+                f.write(f"Best performing algorithm (happiness): {names[best_idx]} with score {happiness_scores[best_idx]:.2f}\n")
+                f.write(f"Fastest algorithm: {names[fastest_idx]} with time {execution_times[fastest_idx]:.2f} seconds\n")
             
-            messagebox.showinfo("Success", f"Results saved to {filename}")
+            messagebox.showinfo("Success", f"Results saved to {main_filename}")
+            return main_filename
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save results: {str(e)}")
+            print(f"Error saving results: {str(e)}")
+            return None
