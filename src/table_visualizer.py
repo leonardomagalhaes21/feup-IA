@@ -4,17 +4,19 @@ import math
 from matplotlib.patches import Circle
 
 class TableVisualizer:
-    def __init__(self, tables, tables_per_page=4, relationship_matrix=None, guests=None):
+    def __init__(self, tables, tables_per_page=4, relationship_matrix=None, guests=None, table_scores=None):
         """
         tables: list of tables, where each table is a list of guest names.
         tables_per_page: number of tables to display per page.
         relationship_matrix: matrix indicating relationships between guests.
         guests: list of all guests.
+        table_scores: dictionary mapping table indices to happiness scores.
         """
         self.tables = tables
         self.tables_per_page = tables_per_page
         self.relationship_matrix = relationship_matrix
         self.guests = guests
+        self.table_scores = table_scores or {}  # Initialize empty dict if None
         # Split the tables into pages.
         n_tables = len(tables)
         self.pages = [tables[i:i+tables_per_page] for i in range(0, n_tables, tables_per_page)]
@@ -91,7 +93,13 @@ class TableVisualizer:
                             ax.plot([x1, x2], [y1, y2], color=color, linewidth=linewidth, alpha=0.7)
 
             table_num = idx + 1 + page_idx * self.tables_per_page
-            ax.set_title(f"Table {table_num}", fontsize=14)
+            
+            # Display table score if available
+            title_text = f"Table {table_num}"
+            if self.table_scores and table_num - 1 in self.table_scores:  # Adjust for 0-based indexing
+                title_text += f" (Score: {self.table_scores[table_num - 1]:.1f})"
+            
+            ax.set_title(title_text, fontsize=14)
         
         # Remove any unused subplots.
         for j in range(idx + 1, len(self.axes)):
@@ -100,6 +108,13 @@ class TableVisualizer:
         self.fig.suptitle(f"Page {page_idx + 1} of {len(self.pages)}", fontsize=16)
         plt.tight_layout(rect=[0, 0, 1, 0.95])
         self.fig.canvas.draw()
+
+    def add_table_scores(self, scores):
+        """Add or update table scores after initialization."""
+        self.table_scores = scores
+        if self.fig is not None and self.current_page is not None:
+            # Redraw current page if the visualization is already active
+            self.draw_page(self.current_page)
 
     def on_key(self, event):
         """Handles key press events for navigation."""

@@ -33,9 +33,26 @@ class Menu:
         self.combo_display.current(0)
         self.combo_display.grid(row=1, column=1, padx=10, pady=10)  # Adjusted row from 2 to 1
 
+        # Add dataset size selection
+        dataset_size_frame = ttk.LabelFrame(self.root, text="Dataset Size")
+        dataset_size_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
+        
+        # Dataset size selection using radio buttons
+        self.dataset_size_var = tk.StringVar(value="small")
+        dataset_sizes = [("Small", "small"), ("Medium", "medium"), ("Large", "large")]
+        
+        for i, (text, value) in enumerate(dataset_sizes):
+            ttk.Radiobutton(
+                dataset_size_frame,
+                text=text,
+                value=value,
+                variable=self.dataset_size_var,
+                command=self.update_dataset_paths
+            ).pack(side=tk.LEFT, anchor="w", padx=20, pady=2)
+
         # Add optimization algorithm options to your menu
         optimization_frame = ttk.LabelFrame(self.root, text="Optimization Algorithms")
-        optimization_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="ew")  # Adjusted row from 3 to 2
+        optimization_frame.grid(row=3, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         
         algorithms = [
             ("Random", self.assign_tables_random),
@@ -60,23 +77,23 @@ class Menu:
         
         # Create a frame for algorithm specific parameters
         self.algorithm_options_frame = ttk.LabelFrame(self.root, text="Algorithm Parameters")
-        self.algorithm_options_frame.grid(row=3, column=0, columnspan=2, padx=10, pady=5, sticky="ew")  # Adjusted row from 4 to 3
+        self.algorithm_options_frame.grid(row=4, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         
         # Initialize matrix builder frame
         self.matrix_builder_frame = ttk.LabelFrame(self.root, text="Dataset Paths")
-        self.matrix_builder_frame.grid(row=4, column=0, columnspan=2, padx=10, pady=5, sticky="ew")  # Adjusted row from 5 to 4
+        self.matrix_builder_frame.grid(row=5, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         
         # Add dataset path entries
         ttk.Label(self.matrix_builder_frame, text="Guest List:").grid(row=0, column=0, padx=5, pady=2, sticky="w")
-        self.guestlist_path = tk.StringVar(value="../dataset/guestlist.csv")
+        self.guestlist_path = tk.StringVar(value="../dataset/small/guestlist_small.csv")
         ttk.Entry(self.matrix_builder_frame, textvariable=self.guestlist_path, width=30).grid(row=0, column=1, padx=5, pady=2)
         
         ttk.Label(self.matrix_builder_frame, text="Likes:").grid(row=1, column=0, padx=5, pady=2, sticky="w")
-        self.likes_path = tk.StringVar(value="../dataset/likes.csv")
+        self.likes_path = tk.StringVar(value="../dataset/small/likes_small.csv")
         ttk.Entry(self.matrix_builder_frame, textvariable=self.likes_path, width=30).grid(row=1, column=1, padx=5, pady=2)
         
         ttk.Label(self.matrix_builder_frame, text="Dislikes:").grid(row=2, column=0, padx=5, pady=2, sticky="w")
-        self.dislikes_path = tk.StringVar(value="../dataset/dislikes.csv")
+        self.dislikes_path = tk.StringVar(value="../dataset/small/dislikes_small.csv")
         ttk.Entry(self.matrix_builder_frame, textvariable=self.dislikes_path, width=30).grid(row=2, column=1, padx=5, pady=2)
         
         # Add a note about automatic initialization
@@ -92,27 +109,40 @@ class Menu:
             self.root,
             text="Optimize Tables",
             command=self.run_selected_algorithm
-        ).grid(row=5, column=0, columnspan=2, padx=10, pady=5, sticky="ew")  # Adjusted row from 6 to 5
+        ).grid(row=6, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         
         # Button to compare all algorithms
         ttk.Button(
             self.root,
             text="Compare All Algorithms",
             command=self.compare_algorithms
-        ).grid(row=6, column=0, columnspan=2, padx=10, pady=5, sticky="ew")  # Adjusted row from 7 to 6
+        ).grid(row=7, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         
         # Initialize algorithm options
         self.update_algorithm_options()
 
         # Status label to show matrix builder status
         self.status_label = ttk.Label(self.root, text="Matrix Builder Status: Not initialized")
-        self.status_label.grid(row=7, column=0, columnspan=2, padx=10, pady=5)  # Adjusted row from 9 to 8
+        self.status_label.grid(row=8, column=0, columnspan=2, padx=10, pady=5)
 
         # Result text area
         self.result_text = tk.Text(self.root, height=10, width=50)
-        self.result_text.grid(row=8, column=0, columnspan=2, padx=10, pady=10)  # Adjusted row from 10 to 9
+        self.result_text.grid(row=9, column=0, columnspan=2, padx=10, pady=10)
         
         self.root.mainloop()
+        
+    def update_dataset_paths(self):
+        """Update dataset paths based on selected dataset size"""
+        size = self.dataset_size_var.get()
+        base_path = f"../dataset/{size}"
+        
+        self.guestlist_path.set(f"{base_path}/guestlist_{size}.csv")
+        self.likes_path.set(f"{base_path}/likes_{size}.csv")
+        self.dislikes_path.set(f"{base_path}/dislikes_{size}.csv")
+        
+        # Reset the matrix builder when dataset changes
+        self.matrix_builder = None
+        self.status_label.config(text="Matrix Builder Status: Reset (dataset changed)")
         
     def initialize_matrix_builder(self):
         """Initialize the matrix builder with the provided dataset paths"""
@@ -149,7 +179,12 @@ class Menu:
 
         # Initialize matrix builder if not already initialized
         if self.matrix_builder is None:
-            self.matrix_builder = MatrixBuilder("dataset/guestlist.csv", "dataset/likes.csv", "dataset/dislikes.csv")
+            # Use the paths based on the selected dataset size
+            self.matrix_builder = MatrixBuilder(
+                self.guestlist_path.get(), 
+                self.likes_path.get(), 
+                self.dislikes_path.get()
+            )
             self.matrix_builder.build_matrix()
             
         data = self.matrix_builder.get_matrix_data()
@@ -284,6 +319,31 @@ class Menu:
         
         return TableOptimizer(relationship_matrix, guests, table_size)
     
+    def calculate_table_happiness(self, optimizer, tables):
+        """
+        Calculate happiness score for each table.
+        Returns a dictionary with table indices as keys and happiness scores as values.
+        """
+        table_scores = {}
+        
+        for i, table in enumerate(tables):
+            # Skip empty tables
+            if not table:
+                continue
+                
+            score = 0
+            # Get indices of guests at this table
+            guest_indices = [optimizer.guests.index(guest) for guest in table]
+            
+            # Calculate pairwise happiness for this table
+            for idx1_pos, idx1 in enumerate(guest_indices):
+                for idx2 in guest_indices[idx1_pos+1:]:
+                    score += optimizer.relationship_matrix[idx1][idx2]
+                    
+            table_scores[i] = score
+            
+        return table_scores
+
     def run_selected_algorithm(self):
         """Runs the selected algorithm with the specified parameters."""
         try:
@@ -328,11 +388,15 @@ class Menu:
             # Display results
             self.display_results(tables, happiness, end_time - start_time)
             
-            # Visualize the tables with relationship lines
+            # Calculate individual table happiness scores
+            table_scores = self.calculate_table_happiness(optimizer, tables)
+            
+            # Visualize the tables with relationship lines and table scores
             visualizer = TableVisualizer(
                 tables=tables,
                 relationship_matrix=optimizer.relationship_matrix,
-                guests=optimizer.guests
+                guests=optimizer.guests,
+                table_scores=table_scores  # Pass table scores to visualizer
             )
             visualizer.show()
             
@@ -473,6 +537,24 @@ class Menu:
             if not happiness_scores:
                 messagebox.showerror("Error", "No successful algorithm runs to display.")
                 return
+            
+            # Find the best solution to visualize
+            if happiness_scores:
+                best_idx = happiness_scores.index(max(happiness_scores))
+                best_tables = tables_solutions[best_idx]
+                
+                # Calculate table happiness scores for the best solution
+                optimizer = self.get_optimizer()
+                table_scores = self.calculate_table_happiness(optimizer, best_tables)
+                
+                # Visualize the best solution with table scores
+                visualizer = TableVisualizer(
+                    tables=best_tables,
+                    relationship_matrix=optimizer.relationship_matrix,
+                    guests=optimizer.guests,
+                    table_scores=table_scores
+                )
+                visualizer.show()
                 
             # Create a new window for charts and make it full screen
             chart_window = tk.Toplevel(self.root)
