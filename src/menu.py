@@ -68,15 +68,15 @@ class Menu:
         
         # Add dataset path entries
         ttk.Label(self.matrix_builder_frame, text="Guest List:").grid(row=0, column=0, padx=5, pady=2, sticky="w")
-        self.guestlist_path = tk.StringVar(value="dataset/guestlist.csv")
+        self.guestlist_path = tk.StringVar(value="../dataset/guestlist.csv")
         ttk.Entry(self.matrix_builder_frame, textvariable=self.guestlist_path, width=30).grid(row=0, column=1, padx=5, pady=2)
         
         ttk.Label(self.matrix_builder_frame, text="Likes:").grid(row=1, column=0, padx=5, pady=2, sticky="w")
-        self.likes_path = tk.StringVar(value="dataset/likes.csv")
+        self.likes_path = tk.StringVar(value="../dataset/likes.csv")
         ttk.Entry(self.matrix_builder_frame, textvariable=self.likes_path, width=30).grid(row=1, column=1, padx=5, pady=2)
         
         ttk.Label(self.matrix_builder_frame, text="Dislikes:").grid(row=2, column=0, padx=5, pady=2, sticky="w")
-        self.dislikes_path = tk.StringVar(value="dataset/dislikes.csv")
+        self.dislikes_path = tk.StringVar(value="../dataset/dislikes.csv")
         ttk.Entry(self.matrix_builder_frame, textvariable=self.dislikes_path, width=30).grid(row=2, column=1, padx=5, pady=2)
         
         # Add a note about automatic initialization

@@ -69,102 +69,305 @@ class TableOptimizer:
         
         return new_tables
     
-    def hill_climbing(self, iterations=1000):
-        """Implement hill climbing algorithm."""
-        current_solution = self.generate_initial_solution()
-        current_score = self.calculate_total_happiness(current_solution)
+    def hill_climbing(self, iterations=1000, max_stagnation=100, num_neighbors=5, restarts=3):
+        """
+        Improved hill climbing algorithm with steepest ascent and random restarts.
         
-        for _ in tqdm(range(iterations), desc="Hill Climbing"):
-            # Get a random neighbor
-            neighbor_solution = self.get_neighbor_solution(current_solution)
-            neighbor_score = self.calculate_total_happiness(neighbor_solution)
+        Args:
+            iterations: Maximum number of iterations per restart
+            max_stagnation: Maximum iterations without improvement before early stopping
+            num_neighbors: Number of neighbors to generate at each step
+            restarts: Number of random restarts
             
-            # If the neighbor is better, move to it
-            if neighbor_score > current_score:
-                current_solution = neighbor_solution
-                current_score = neighbor_score
+        Returns:
+            Tuple of (best solution, best score)
+        """
+        best_solution = None
+        best_score = float('-inf')
         
-        return current_solution, current_score
+        for restart in range(restarts):
+            current_solution = self.generate_initial_solution()
+            current_score = self.calculate_total_happiness(current_solution)
+            stagnation_counter = 0
+            
+            for _ in tqdm(range(iterations), desc=f"Hill Climbing (Restart {restart+1}/{restarts})"):
+                # Generate multiple neighbors and select the best one
+                best_neighbor = None
+                best_neighbor_score = current_score
+                
+                for _ in range(num_neighbors):
+                    neighbor_solution = self.get_neighbor_solution(current_solution)
+                    neighbor_score = self.calculate_total_happiness(neighbor_solution)
+                    
+                    if neighbor_score > best_neighbor_score:
+                        best_neighbor = neighbor_solution
+                        best_neighbor_score = neighbor_score
+                
+                # If we found a better neighbor, move to it
+                if best_neighbor_score > current_score:
+                    current_solution = best_neighbor
+                    current_score = best_neighbor_score
+                    stagnation_counter = 0
+                else:
+                    stagnation_counter += 1
+                    
+                # Update global best solution
+                if current_score > best_score:
+                    best_solution = copy.deepcopy(current_solution)
+                    best_score = current_score
+                    
+                # Early stopping if no improvement for max_stagnation iterations
+                if stagnation_counter >= max_stagnation:
+                    break
+        
+        return best_solution, best_score
     
-    def simulated_annealing(self, initial_temp=100, cooling_rate=0.95, iterations=1000):
-        """Implement simulated annealing algorithm."""
+    def simulated_annealing(self, initial_temp=100, cooling_rate=0.95, iterations=1000, 
+                            neighbors_per_iter=3, max_stagnation=100, reheat_factor=1.5):
+        """
+        Implement enhanced simulated annealing algorithm with:
+        - Multiple neighbor evaluation
+        - Reheating when stuck
+        - Stagnation detection and early stopping
+        
+        Args:
+            initial_temp: Starting temperature
+            cooling_rate: Rate at which temperature decreases
+            iterations: Maximum number of iterations
+            neighbors_per_iter: Number of neighbors to evaluate per iteration
+            max_stagnation: Maximum iterations without improvement before reheating
+            reheat_factor: Factor by which to increase temperature when reheating
+        
+        Returns:
+            Tuple of (best solution, best score)
+        """
         current_solution = self.generate_initial_solution()
         current_score = self.calculate_total_happiness(current_solution)
         best_solution = copy.deepcopy(current_solution)
         best_score = current_score
         
         temperature = initial_temp
+        stagnation_counter = 0
+        global_stagnation = 0
         
         for _ in tqdm(range(iterations), desc="Simulated Annealing"):
-            # Get a random neighbor
-            neighbor_solution = self.get_neighbor_solution(current_solution)
-            neighbor_score = self.calculate_total_happiness(neighbor_solution)
+            # Generate multiple neighbors and pick the best one
+            best_neighbor = None
+            best_neighbor_score = float('-inf')
+            
+            for _ in range(neighbors_per_iter):
+                neighbor_solution = self.get_neighbor_solution(current_solution)
+                neighbor_score = self.calculate_total_happiness(neighbor_solution)
+                
+                if neighbor_score > best_neighbor_score:
+                    best_neighbor = neighbor_solution
+                    best_neighbor_score = neighbor_score
             
             # Calculate acceptance probability
-            delta = neighbor_score - current_score
+            delta = best_neighbor_score - current_score
             acceptance_probability = 1.0 if delta > 0 else math.exp(delta / temperature)
             
             # Decide whether to accept the neighbor
             if random.random() < acceptance_probability:
-                current_solution = neighbor_solution
-                current_score = neighbor_score
+                current_solution = best_neighbor
+                current_score = best_neighbor_score
+                
+                # Reset stagnation if we made an improving move
+                if delta > 0:
+                    stagnation_counter = 0
+                else:
+                    stagnation_counter += 1
+            else:
+                stagnation_counter += 1
             
             # Update best solution if current is better
             if current_score > best_score:
                 best_solution = copy.deepcopy(current_solution)
                 best_score = current_score
+                global_stagnation = 0
+            else:
+                global_stagnation += 1
             
-            # Cool down the temperature
-            temperature *= cooling_rate
+            # Reheat if stuck in local optima
+            if stagnation_counter >= max_stagnation:
+                temperature *= reheat_factor
+                stagnation_counter = 0
+            else:
+                # Regular cooling
+                temperature *= cooling_rate
+            
+            # Early stopping or reset if no global improvement
+            if global_stagnation >= 2 * max_stagnation:
+                if random.random() < 0.5:  # 50% chance to reset
+                    current_solution = self.generate_initial_solution()
+                    current_score = self.calculate_total_happiness(current_solution)
+                    temperature = initial_temp  # Reset temperature too
+                    global_stagnation = 0
+            
+            # Stop if temperature is too low
+            if temperature < 0.01:
+                break
         
         return best_solution, best_score
     
-    def tabu_search(self, tabu_size=10, iterations=1000):
-        """Implement tabu search algorithm."""
+    def tabu_search(self, tabu_size=15, iterations=1000, max_stagnation=100, strategic_oscillation=True):
+        """
+        Enhanced tabu search algorithm with dynamic tabu tenure, strategic oscillation,
+        and intensification/diversification phases.
+        
+        Args:
+            tabu_size: Initial size of the tabu list
+            iterations: Maximum number of iterations
+            max_stagnation: Max iterations without improvement before diversification
+            strategic_oscillation: Whether to use strategic oscillation
+            
+        Returns:
+            Tuple of (best solution, best score)
+        """
+        # Generate initial solution
         current_solution = self.generate_initial_solution()
         current_score = self.calculate_total_happiness(current_solution)
         best_solution = copy.deepcopy(current_solution)
         best_score = current_score
         
-        tabu_list = []  # Store hash values of recent solutions
+        # Initialize tabu structures
+        tabu_moves = {}  # Dictionary: (guest1, guest2) -> expiration iteration
+        frequency = {}   # Frequency-based memory for diversification
+        stagnation = 0   # Count iterations without improvement
+        diversify_mode = False
+        dynamic_tabu_size = tabu_size
         
-        for _ in tqdm(range(iterations), desc="Tabu Search"):
-            # Generate multiple neighbors and select the best non-tabu neighbor
+        for iter_count in tqdm(range(iterations), desc="Tabu Search"):
             best_neighbor = None
             best_neighbor_score = float('-inf')
+            best_move = None
             
-            # Generate several neighbors
-            for _ in range(5):  # Consider 5 neighbors
+            # Generate and evaluate a larger neighborhood
+            candidates = []
+            for _ in range(10):  # Examine more neighbors
                 neighbor = self.get_neighbor_solution(current_solution)
-                neighbor_hash = hash(str(neighbor))
                 neighbor_score = self.calculate_total_happiness(neighbor)
                 
-                # Select best non-tabu neighbor or if aspiration criterion is met
-                if neighbor_hash not in tabu_list and neighbor_score > best_neighbor_score:
-                    best_neighbor = neighbor
-                    best_neighbor_score = neighbor_score
-                
-                # Aspiration criterion: accept tabu solution if better than best so far
-                elif neighbor_score > best_score:
-                    best_neighbor = neighbor
-                    best_neighbor_score = neighbor_score
+                # Identify the move (which guests were swapped)
+                move = self._identify_move(current_solution, neighbor)
+                if move:
+                    candidates.append((neighbor, neighbor_score, move))
             
-            # Move to the selected neighbor
-            if best_neighbor:
-                current_solution = best_neighbor
-                current_score = best_neighbor_score
+            # Sort candidates by score (descending)
+            candidates.sort(key=lambda x: x[1], reverse=True)
+            
+            # Select the best non-tabu move or apply aspiration criterion
+            for neighbor, neighbor_score, move in candidates:
+                is_tabu = move in tabu_moves and tabu_moves[move] > iter_count
                 
-                # Add to tabu list
-                tabu_list.append(hash(str(current_solution)))
-                if len(tabu_list) > tabu_size:
-                    tabu_list.pop(0)  # Remove oldest entry
+                # Accept if not tabu, or if aspiration criterion met
+                # (aspiration = better than best solution or in diversification mode)
+                if (not is_tabu) or (neighbor_score > best_score) or \
+                   (diversify_mode and neighbor_score > current_score * 0.95):  # Accept slightly worse in diversify mode
+                    best_neighbor = neighbor
+                    best_neighbor_score = neighbor_score
+                    best_move = move
+                    break
+            
+            # If no valid move found (unlikely), get first candidate
+            if best_neighbor is None and candidates:
+                best_neighbor, best_neighbor_score, best_move = candidates[0]
+            
+            # If still no valid move, generate a random solution
+            if best_neighbor is None:
+                best_neighbor = self.generate_initial_solution()
+                best_neighbor_score = self.calculate_total_happiness(best_neighbor)
+                best_move = None
+            
+            # Move to new solution
+            current_solution = best_neighbor
+            current_score = best_neighbor_score
+            
+            # Update frequency memory
+            if best_move:
+                frequency[best_move] = frequency.get(best_move, 0) + 1
                 
-                # Update best solution if needed
-                if current_score > best_score:
-                    best_solution = copy.deepcopy(current_solution)
-                    best_score = current_score
+                # Add move to tabu list
+                tenure = dynamic_tabu_size + random.randint(-2, 2)  # Add some randomness to tenure
+                tabu_moves[best_move] = iter_count + max(1, tenure)
+            
+            # Update best solution if improved
+            if current_score > best_score:
+                best_solution = copy.deepcopy(current_solution)
+                best_score = current_score
+                stagnation = 0
+            else:
+                stagnation += 1
+            
+            # Clean expired tabu moves
+            tabu_moves = {k: v for k, v in tabu_moves.items() if v > iter_count}
+            
+            # Strategic oscillation: alternate between intensification and diversification
+            if stagnation >= max_stagnation:
+                if strategic_oscillation:
+                    diversify_mode = not diversify_mode
+                    if diversify_mode:
+                        # Diversification: increase tabu tenure to force exploration
+                        dynamic_tabu_size = int(tabu_size * 1.5)
+                        # Make a larger perturbation to escape local optima
+                        current_solution = self._strong_perturbation(current_solution)
+                        current_score = self.calculate_total_happiness(current_solution)
+                    else:
+                        # Intensification: reduce tabu tenure to focus on good regions
+                        dynamic_tabu_size = max(3, int(tabu_size * 0.7))
+                stagnation = 0
+                
+            # Early stopping if tabu list gets too large or no movement possible
+            if len(tabu_moves) > 3 * tabu_size and stagnation > 2 * max_stagnation:
+                break
         
         return best_solution, best_score
+
+    def _identify_move(self, old_solution, new_solution):
+        """Identify which guests were swapped between two solutions."""
+        # Find tables where old and new solutions differ
+        different_tables = []
+        for i, (old_table, new_table) in enumerate(zip(old_solution, new_solution)):
+            if set(old_table) != set(new_table):
+                different_tables.append(i)
+        
+        # Find the swapped guests
+        if len(different_tables) == 2:
+            t1, t2 = different_tables
+            old_t1, old_t2 = set(old_solution[t1]), set(old_solution[t2])
+            new_t1, new_t2 = set(new_solution[t1]), set(new_solution[t2])
+            
+            moved_to_t1 = list(new_t1 - old_t1)
+            moved_to_t2 = list(new_t2 - old_t2)
+            
+            if len(moved_to_t1) == 1 and len(moved_to_t2) == 1:
+                # Sort the guests to ensure consistent representation
+                return tuple(sorted([moved_to_t1[0], moved_to_t2[0]]))
+        
+        # If couldn't identify a simple swap, return None
+        return None
+
+    def _strong_perturbation(self, solution):
+        """Make a stronger perturbation to escape local optima."""
+        perturbed = copy.deepcopy(solution)
+        
+        # Multiple random swaps
+        num_swaps = random.randint(2, 5)
+        for _ in range(num_swaps):
+            table1_idx = random.randint(0, len(perturbed) - 1)
+            table2_idx = random.randint(0, len(perturbed) - 1)
+            
+            while table1_idx == table2_idx:
+                table2_idx = random.randint(0, len(perturbed) - 1)
+            
+            if perturbed[table1_idx] and perturbed[table2_idx]:
+                guest1_idx = random.randint(0, len(perturbed[table1_idx]) - 1)
+                guest2_idx = random.randint(0, len(perturbed[table2_idx]) - 1)
+                
+                perturbed[table1_idx][guest1_idx], perturbed[table2_idx][guest2_idx] = \
+                    perturbed[table2_idx][guest2_idx], perturbed[table1_idx][guest1_idx]
+        
+        return perturbed
     
     def genetic_algorithm(self, population_size=100, generations=200, mutation_rate=0.05, elite_size=5):
         """
@@ -350,23 +553,119 @@ class TableOptimizer:
             
         return tables
         
-    def assign_tables_kmeans(self):
-        """Use K-means clustering to assign guests to tables based on relationship scores."""
-        # Use K-means to cluster guests based on their relationship scores
-        kmeans = KMeans(n_clusters=self.num_tables, random_state=42, n_init=10)
-        clusters = kmeans.fit_predict(self.relationship_matrix)
+    def assign_tables_kmeans(self, n_inits=15, balance_method='smart'):
+        """
+        Use enhanced K-means clustering to assign guests to tables based on relationship scores.
         
-        # Initialize tables
-        self.tables = [[] for _ in range(self.num_tables)]
+        Args:
+            n_inits: Number of different initializations for K-means
+            balance_method: Method for balancing tables ('smart' or 'basic')
         
-        # Assign guests to tables based on their cluster
-        for i, cluster in enumerate(clusters):
-            self.tables[cluster].append(self.guests[i])
+        Returns:
+            List of tables with guest assignments
+        """
+        # Transform the relationship matrix to a distance matrix
+        # Invert relationships: higher relationship scores = closer distance
+        max_score = np.max(self.relationship_matrix)
+        distance_matrix = np.array([
+            [max_score - self.relationship_matrix[i][j] if i != j else 0 
+             for j in range(len(self.guests))]
+            for i in range(len(self.guests))
+        ])
         
-        # Balance tables if needed
-        self.balance_tables()
+        # Try multiple K-means runs and select the best one
+        best_tables = None
+        best_happiness = float('-inf')
+        
+        for _ in range(n_inits):
+            # Run K-means with different initialization
+            kmeans = KMeans(n_clusters=self.num_tables, n_init=10, random_state=random.randint(0, 999))
+            clusters = kmeans.fit_predict(distance_matrix)
+            
+            # Initialize tables
+            tables = [[] for _ in range(self.num_tables)]
+            
+            # Assign guests to tables based on their cluster
+            for i, cluster in enumerate(clusters):
+                tables[cluster].append(self.guests[i])
+            
+            # Calculate happiness before balancing
+            happiness = self.calculate_total_happiness(tables)
+            
+            if happiness > best_happiness:
+                best_happiness = happiness
+                best_tables = tables
+        
+        self.tables = best_tables
+        
+        # Balance tables with smart approach
+        if balance_method == 'smart':
+            self._smart_balance_tables()
+        else:
+            self.balance_tables()
         
         return self.tables
+
+    def _smart_balance_tables(self):
+        """Balance tables while trying to maintain high happiness scores."""
+        # Calculate target size for each table
+        total_guests = len(self.guests)
+        min_guests_per_table = total_guests // self.num_tables
+        extra_guests = total_guests % self.num_tables
+        
+        # Identify tables that need guests (too small) and those with extra guests (too large)
+        tables_too_small = []
+        tables_too_large = []
+        
+        for i, table in enumerate(self.tables):
+            target_size = min_guests_per_table + (1 if i < extra_guests else 0)
+            if len(table) < target_size:
+                tables_too_small.append((i, target_size - len(table)))  # (table_idx, needed_guests)
+            elif len(table) > target_size:
+                tables_too_large.append((i, len(table) - target_size))  # (table_idx, extra_guests)
+        
+        # Move guests from large to small tables based on minimizing happiness loss
+        for small_idx, needed in tables_too_small:
+            for _ in range(needed):
+                best_happiness_loss = float('inf')
+                best_move = None
+                
+                # Find the best guest to move from an oversized table
+                for large_idx, _ in tables_too_large:
+                    if len(self.tables[large_idx]) <= min_guests_per_table:
+                        continue  # Skip if table no longer has extra guests
+                    
+                    for guest_idx, guest in enumerate(self.tables[large_idx]):
+                        # Calculate happiness loss if this guest is moved
+                        original = self.calculate_total_happiness([self.tables[large_idx], self.tables[small_idx]])
+                        
+                        # Simulate move
+                        new_large = self.tables[large_idx].copy()
+                        new_small = self.tables[small_idx].copy()
+                        guest = new_large.pop(guest_idx)
+                        new_small.append(guest)
+                        
+                        new_happiness = self.calculate_total_happiness([new_large, new_small])
+                        happiness_loss = original - new_happiness
+                        
+                        if happiness_loss < best_happiness_loss:
+                            best_happiness_loss = happiness_loss
+                            best_move = (large_idx, guest_idx, guest)
+                
+                # Apply the best move if found
+                if best_move:
+                    large_idx, guest_idx, guest = best_move
+                    self.tables[large_idx].pop(guest_idx)
+                    self.tables[small_idx].append(guest)
+                    
+                    # Update large tables list
+                    for i, (idx, count) in enumerate(tables_too_large):
+                        if idx == large_idx:
+                            if count > 1:
+                                tables_too_large[i] = (idx, count - 1)
+                            else:
+                                tables_too_large.pop(i)
+                            break
     
     def assign_tables_greedy(self):
         """Use a greedy approach to assign guests to tables based on relationship scores."""
