@@ -163,9 +163,18 @@ class TableOptimizer:
                     best_neighbor = neighbor_solution
                     best_neighbor_score = neighbor_score
             
+            # Ensure we have a valid neighbor
+            if best_neighbor is None:
+                continue
+                
             # Calculate acceptance probability
             delta = best_neighbor_score - current_score
-            acceptance_probability = 1.0 if delta > 0 else math.exp(delta / temperature)
+            
+            # Accept improving moves always, and worsening moves with probability based on temperature
+            if delta > 0:
+                acceptance_probability = 1.0
+            else:
+                acceptance_probability = math.exp(delta / temperature)
             
             # Decide whether to accept the neighbor
             if random.random() < acceptance_probability:
