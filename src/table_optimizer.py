@@ -86,7 +86,7 @@ class TableOptimizer:
         best_score = float('-inf')
         
         for restart in range(restarts):
-            current_solution = self.generate_initial_solution()
+            current_solution = self.assign_tables_greedy()
             current_score = self.calculate_total_happiness(current_solution)
             stagnation_counter = 0
             
