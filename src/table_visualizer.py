@@ -109,13 +109,6 @@ class TableVisualizer:
         plt.tight_layout(rect=[0, 0, 1, 0.95])
         self.fig.canvas.draw()
 
-    def add_table_scores(self, scores):
-        """Add or update table scores after initialization."""
-        self.table_scores = scores
-        if self.fig is not None and self.current_page is not None:
-            # Redraw current page if the visualization is already active
-            self.draw_page(self.current_page)
-
     def on_key(self, event):
         """Handles key press events for navigation."""
         if event.key == 'right':

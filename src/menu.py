@@ -6,7 +6,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from matrix_builder import MatrixBuilder
-from seat_planner import SeatPlanner
 from table_visualizer import TableVisualizer
 from table_optimizer import TableOptimizer
 
@@ -532,30 +531,7 @@ class Menu:
                 except Exception as e:
                     print(f"Error with {name}: {str(e)}")
                     messagebox.showwarning("Algorithm Error", f"Error running {name}: {str(e)}")
-            
-            # Only proceed with chart if we have results
-            if not happiness_scores:
-                messagebox.showerror("Error", "No successful algorithm runs to display.")
-                return
-            
-            # Find the best solution to visualize
-            if happiness_scores:
-                best_idx = happiness_scores.index(max(happiness_scores))
-                best_tables = tables_solutions[best_idx]
-                
-                # Calculate table happiness scores for the best solution
-                optimizer = self.get_optimizer()
-                table_scores = self.calculate_table_happiness(optimizer, best_tables)
-                
-                # Visualize the best solution with table scores
-                visualizer = TableVisualizer(
-                    tables=best_tables,
-                    relationship_matrix=optimizer.relationship_matrix,
-                    guests=optimizer.guests,
-                    table_scores=table_scores
-                )
-                visualizer.show()
-                
+                            
             # Create a new window for charts and make it full screen
             chart_window = tk.Toplevel(self.root)
             chart_window.title("Algorithm Performance Comparison")
