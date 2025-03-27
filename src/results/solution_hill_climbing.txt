@@ -1,0 +1,33 @@
+Solution for Hill Climbing Algorithm
+===============================
+
+Happiness Score: 950.00
+Execution Time: 5.02 seconds
+
+Table Assignments:
+
+Table 1: Austin Spears, Preston Jackson, Michael Robinson, Dennis Coffey, Christopher Cox, Destiny Fisher, Sarah Pruitt, Shawn Davenport
+Table 2: Angelica Gordon, Jacqueline Choi, Sydney Reese, Jacob Matthews, Tonya Gonzalez, Catherine Holden, Jessica Brown, Stephen Massey
+Table 3: Jonathon Williams, Shawn Rubio, Mary Clements, Jamie Raymond, Mary Cochran, Katelyn Williams, Melanie Howard, Joseph Ross
+Table 4: William Reyes, Rebecca Mullins, Casey Walker, Jeremy Zimmerman, Amy Perez, Michele Alexander, Dorothy Nelson, Mary Franco
+Table 5: Michelle Giles, Jeffery White, Glenn Bailey, Kenneth Ellis II, Brian Gomez, Brittney Braun, Brianna Osborn, Thomas Moody
+Table 6: Makayla Chavez, Anne Munoz, Pamela Fleming, Heather Mack, Luis Carlson, Dr. Ryan Garcia, Jason Mason, Meghan Jackson
+Table 7: Robert Martin MD, Richard Allen, Aaron Ballard MD, Wesley Burnett, Gregory Harrison, Alexis Medina, Sean Martinez, Claire Collins
+Table 8: Karen Brown, Emily White, Jane Wolf, Robin Miller, Jaime Fisher, Andrew Martin, Patrick Humphrey, Sydney Patterson
+Table 9: Anthony Stevenson, Scott Mcguire, Cindy Davila, Nicole Gonzalez, Daniel Ray, Terry Monroe, Christopher Huff, Vincent Hickman
+Table 10: Michael Williams, Daniel Tran, Thomas Gonzalez, Robert Bauer, Anthony Davis, Ricky Bonilla, Tyler Johnson DDS, Jessica Zavala
+Table 11: Karen Johnson, Whitney Lyons, Henry Good, Joseph Brown, Karen Perry, Frank Gonzalez, Jeffrey Nelson, Alex Sanchez
+Table 12: Billy Rios, Jose Mata, Karen Sanchez, Edward Sanchez PhD, James Graham, Tamara Franco, Levi Carr, Kevin Mathews
+Table 13: Jordan Foley, Ashley Jarvis, Brandy Dalton, Nathaniel Nguyen, Allison Johnson, Natalie Carlson, Chris Alvarez, Ashley Kennedy
+Table 14: Timothy Kelley, Mrs. Sue Richards, Sarah Mitchell, Mariah Mckinney, Michael Morgan, Mary Newman, Olivia Campbell, Andrea Larsen
+Table 15: Sydney Reyes, Aaron Perry, Daniel Williams, Ms. Kristina Edwards MD, Shelby Petersen, Wayne Silva, Michael Parker, Dawn Pineda
+Table 16: Benjamin Burke, Justin Romero, Tammy Sherman, Kelly Wright, Michelle Alvarez, Theodore Ramos, Stephen Jones, Kristen Brooks
+Table 17: David Miles, Robert Washington, Denise Walker, Erica Hines, Vanessa Richardson, Matthew Hanson, Jimmy Sutton, Anthony Ross
+Table 18: Rebekah Knapp, David Reid, Sean Wise, Holly Parker, Emily Barnes, Bryan Hicks, Austin Tucker, Christopher Collins
+Table 19: Andrea Hines, Mary Williams, James Lee, Shelly Armstrong, Mrs. Melanie Evans, Casey Thomas, Eric Jones, Jason Gill
+Table 20: Robert Rich, Patrick Rosales, Darlene Nichols, Theresa Hernandez, Deanna Ruiz, Charles Leonard, Joseph Proctor, Steven Stewart
+Table 21: Breanna Massey, Shannon Manning, Fernando Melton, Marcus Carey, Sarah Gutierrez, Angela Benton, Lee Neal, Jean Weber
+Table 22: Andrew Shields, Daniel Cortez, Jason Williamson, Deborah Torres, Ann Collins, Casey Reyes, Denise Nelson, Brandy Bolton
+Table 23: Luis Le, Kimberly Snyder, Kimberly Sosa, Joanna Roman, Robert Yang, Joseph Nguyen, Daniel Newman, Michael Powell
+Table 24: Gabriel Watson, Ethan Johnson, Zachary Anderson, Melanie Cunningham, Jonathan Meyers, Kenneth King, Cynthia Hawkins, Stephanie Farmer MD
+Table 25: Amy Mcgee, Jessica Finley, Brenda King, Kevin Wells, Candice Durham, Joe Simmons, Timothy Mason, Marc Brown

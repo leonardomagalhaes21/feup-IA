@@ -141,7 +141,8 @@ class TableOptimizer:
         Returns:
             Tuple of (best solution, best score)
         """
-        current_solution = self.generate_initial_solution()
+        # Start with the greedy solution instead of a random one
+        current_solution = self.assign_tables_greedy()
         current_score = self.calculate_total_happiness(current_solution)
         best_solution = copy.deepcopy(current_solution)
         best_score = current_score
@@ -208,7 +209,7 @@ class TableOptimizer:
             # Early stopping or reset if no global improvement
             if global_stagnation >= 2 * max_stagnation:
                 if random.random() < 0.5:  # 50% chance to reset
-                    current_solution = self.generate_initial_solution()
+                    current_solution = self.assign_tables_greedy()  # Reset to greedy solution
                     current_score = self.calculate_total_happiness(current_solution)
                     temperature = initial_temp  # Reset temperature too
                     global_stagnation = 0
@@ -234,7 +235,7 @@ class TableOptimizer:
             Tuple of (best solution, best score)
         """
         # Generate initial solution
-        current_solution = self.generate_initial_solution()
+        current_solution = self.assign_tables_greedy()
         current_score = self.calculate_total_happiness(current_solution)
         best_solution = copy.deepcopy(current_solution)
         best_score = current_score
@@ -393,9 +394,25 @@ class TableOptimizer:
         """
         print(f"Running Genetic Algorithm with population size {population_size}, {generations} generations")
         
-        # Initialize population with random solutions
+        # Initialize population with greedy solution and variations
         population = []
-        for _ in range(population_size):
+        
+        # Start with a greedy solution
+        greedy_solution = self.assign_tables_greedy()
+        greedy_fitness = self.calculate_total_happiness(greedy_solution)
+        population.append((greedy_solution, greedy_fitness))
+        
+        # Add some variations of the greedy solution
+        for _ in range(min(int(population_size * 0.3), 20)):  # 30% of population or max 20
+            variant = copy.deepcopy(greedy_solution)
+            # Apply multiple mutations to create diverse variants
+            for _ in range(random.randint(2, 5)):
+                variant = self._mutation(variant, mutation_rate * 2)  # Increased mutation rate for diversity
+            variant_fitness = self.calculate_total_happiness(variant)
+            population.append((variant, variant_fitness))
+        
+        # Fill the rest with random solutions
+        while len(population) < population_size:
             solution = self._create_random_solution()
             fitness = self.calculate_total_happiness(solution)
             population.append((solution, fitness))

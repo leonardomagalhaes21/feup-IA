@@ -1,0 +1,27 @@
+Algorithm Comparison Results
+===========================
+
+Table Size: 8
+Number of Guests: 200
+
+Dataset Information:
+  Guest List: ../dataset/small/guestlist_small.csv
+  Likes: ../dataset/small/likes_small.csv
+  Dislikes: ../dataset/small/dislikes_small.csv
+
+Results Summary:
+------------------------------------------------------------------------------------
+Algorithm               | Happiness Score | Execution Time (s) | Solution File
+------------------------------------------------------------------------------------
+Random                   |         -32.00 |             0.00 | solution_random.txt
+Hill Climbing            |         950.00 |             5.02 | solution_hill_climbing.txt
+Simulated Annealing      |         950.00 |             0.87 | solution_simulated_annealing.txt
+Tabu Search              |        1000.00 |             4.20 | solution_tabu_search.txt
+Genetic Algorithm        |        1164.00 |             6.42 | solution_genetic_algorithm.txt
+K-means                  |        1207.00 |             0.55 | solution_k-means.txt
+Greedy                   |        1050.00 |             0.81 | solution_greedy.txt
+------------------------------------------------------------------------------------
+
+Conclusion:
+Best performing algorithm (happiness): K-means with score 1207.00
+Fastest algorithm: Random with time 0.00 seconds
