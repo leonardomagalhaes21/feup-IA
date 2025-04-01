@@ -541,7 +541,7 @@ class Menu:
             screen_height = chart_window.winfo_screenheight()
             chart_window.geometry(f"{screen_width}x{screen_height}+0+0")
             
-            # Create a toolbar frame at the top for the save button
+            # Create a toolbar frame at the top for the save button and pagination
             toolbar_frame = ttk.Frame(chart_window)
             toolbar_frame.pack(side=tk.TOP, fill=tk.X, padx=10, pady=5)
             
@@ -557,44 +557,248 @@ class Menu:
             chart_frame = ttk.Frame(chart_window)
             chart_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=10, pady=5)
             
-            # Create figure with two subplots - make it larger for full screen
-            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 10))
+            # Create a list of algorithms to analyze in individual pages (exclude Random and Greedy)
+            detailed_analysis_algos = [name for name in names if name not in ["Random", "Greedy"]]
             
-            # Plot happiness scores
-            x = np.arange(len(names))
-            ax1.bar(x, happiness_scores, width=0.6, align='center')
-            ax1.set_xticks(x)
-            ax1.set_xticklabels(names, rotation=45, ha='right')
-            ax1.set_ylabel('Happiness Score')
-            ax1.set_title('Happiness Score by Algorithm')
+            # Calculate total number of pages
+            # Page 1: Basic performance, Page 2: Efficiency analysis
+            # One page per algorithm in detailed_analysis_algos
+            total_pages = 2 + len(detailed_analysis_algos)
             
-            # Format y-axis to show integer values
-            ax1.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
+            # Track current page in pagination
+            current_page = tk.IntVar(value=1)
             
-            # Add value labels on bars
-            for i, v in enumerate(happiness_scores):
-                ax1.text(i, v + 0.5, f"{v:.1f}", ha='center')
+            # Get optimizer for calculations
+            optimizer = self.get_optimizer()
             
-            # Plot execution times
-            ax2.bar(x, execution_times, width=0.6, align='center', color='orange')
-            ax2.set_xticks(x)
-            ax2.set_xticklabels(names, rotation=45, ha='right')
-            ax2.set_ylabel('Execution Time (seconds)')
-            ax2.set_title('Execution Time by Algorithm')
+            # Function to update graph display based on current page
+            def show_graph_page(page_num):
+                # Clear existing widgets from chart frame
+                for widget in chart_frame.winfo_children():
+                    widget.destroy()
+                
+                if page_num == 1:
+                    # Page 1: Original Bar Charts (Happiness and Execution Time)
+                    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 10))
+                    
+                    # Plot happiness scores
+                    x = np.arange(len(names))
+                    ax1.bar(x, happiness_scores, width=0.6, align='center')
+                    ax1.set_xticks(x)
+                    ax1.set_xticklabels(names, rotation=45, ha='right')
+                    ax1.set_ylabel('Happiness Score')
+                    ax1.set_title('Happiness Score by Algorithm')
+                    
+                    # Format y-axis to show integer values
+                    ax1.yaxis.set_major_locator(plt.MaxNLocator(integer=True))
+                    
+                    # Add value labels on bars
+                    for i, v in enumerate(happiness_scores):
+                        ax1.text(i, v + 0.5, f"{v:.1f}", ha='center')
+                    
+                    # Plot execution times
+                    ax2.bar(x, execution_times, width=0.6, align='center', color='orange')
+                    ax2.set_xticks(x)
+                    ax2.set_xticklabels(names, rotation=45, ha='right')
+                    ax2.set_ylabel('Execution Time (seconds)')
+                    ax2.set_title('Execution Time by Algorithm')
+                    
+                    # Add value labels on bars
+                    for i, v in enumerate(execution_times):
+                        ax2.text(i, v + 0.05, f"{v:.2f}s", ha='center')
+                    
+                    # Update page label
+                    page_label.config(text=f"Page {page_num}/{total_pages}: Basic Performance")
+                    
+                elif page_num == 2:
+                    # Page 2: Efficiency comparison (Happiness per second) - excluding Random
+                    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 10))
+                    
+                    # Filter out Random algorithm
+                    non_random_indices = [i for i, name in enumerate(names) if name != "Random"]
+                    non_random_names = [names[i] for i in non_random_indices]
+                    non_random_happiness = [happiness_scores[i] for i in non_random_indices]
+                    non_random_times = [execution_times[i] for i in non_random_indices]
+                    
+                    # Calculate efficiency (happiness per second) - excluding Random
+                    efficiency = [h/t if t > 0 else 0 for h, t in zip(non_random_happiness, non_random_times)]
+                    
+                    # Sort algorithms by efficiency
+                    sorted_indices = sorted(range(len(efficiency)), key=lambda i: efficiency[i], reverse=True)
+                    sorted_names = [non_random_names[i] for i in sorted_indices]
+                    sorted_efficiency = [efficiency[i] for i in sorted_indices]
+                    
+                    # Create horizontal bar chart for efficiency
+                    y_pos = np.arange(len(sorted_names))
+                    ax1.barh(y_pos, sorted_efficiency, align='center', color='green')
+                    ax1.set_yticks(y_pos)
+                    ax1.set_yticklabels(sorted_names)
+                    ax1.invert_yaxis()  # labels read top-to-bottom
+                    ax1.set_xlabel('Happiness per Second (Efficiency)')
+                    ax1.set_title('Algorithm Efficiency: Happiness Score per Second')
+                    
+                    # Add value labels
+                    for i, v in enumerate(sorted_efficiency):
+                        ax1.text(v + 0.5, i, f"{v:.2f}", va='center')
+                    
+                    # Add a score-time scatterplot in the second subplot
+                    ax2.scatter(non_random_times, non_random_happiness, s=100, alpha=0.7)
+                    for i, name in enumerate(non_random_names):
+                        ax2.annotate(name, (non_random_times[i], non_random_happiness[i]),
+                                   textcoords="offset points", xytext=(0, 10), ha='center')
+                    ax2.set_xlabel('Time (s)')
+                    ax2.set_ylabel('Happiness')
+                    ax2.set_title('Performance Tradeoff')
+                    ax2.grid(True, linestyle='--', alpha=0.7)
+                    
+                    # Update page label
+                    page_label.config(text=f"Page {page_num}/{total_pages}: Efficiency Analysis")
+                
+                else:
+                    # Pages 3+: Detailed analysis for each algorithm (one algorithm per page)
+                    # Calculate which algorithm to show based on page number
+                    algo_index = page_num - 3
+                    
+                    if algo_index < len(detailed_analysis_algos):
+                        # Get the algorithm name for this page
+                        algo_name = detailed_analysis_algos[algo_index]
+                        
+                        # Find the corresponding index in the original names list
+                        orig_idx = names.index(algo_name)
+                        algo_tables = tables_solutions[orig_idx]
+                        algo_happiness = happiness_scores[orig_idx]
+                        algo_time = execution_times[orig_idx]
+                        
+                        # Create a 1x3 subplot layout for this algorithm
+                        fig, axes = plt.subplots(1, 3, figsize=(15, 10))
+                        
+                        # Calculate statistics
+                        table_sizes = [len(table) for table in algo_tables if table]  # number of guests per table
+                        
+                        # Calculate happiness per table
+                        try:
+                            table_happiness = []
+                            
+                            for table in algo_tables:
+                                if not table:  # Skip empty tables
+                                    continue
+                                    
+                                # Get indices of guests at this table
+                                guest_indices = [optimizer.guests.index(guest) for guest in table]
+                                
+                                # Calculate total happiness for this table
+                                score = 0
+                                for idx1_pos, idx1 in enumerate(guest_indices):
+                                    for idx2 in guest_indices[idx1_pos+1:]:
+                                        score += optimizer.relationship_matrix[idx1][idx2]
+                                        
+                                table_happiness.append(score)
+                        except Exception as e:
+                            # Fallback if we can't calculate happiness per table
+                            print(f"Error calculating table happiness: {e}")
+                            table_happiness = list(range(len(table_sizes)))
+                        
+                        # 1. Bar chart of table sizes
+                        ax1 = axes[0]
+                        ax1.bar(range(1, len(table_sizes) + 1), table_sizes, color='skyblue')
+                        ax1.set_xlabel('Table Number')
+                        ax1.set_ylabel('Number of Guests')
+                        ax1.set_title(f'Guest Distribution')
+                        ax1.set_xticks(range(1, len(table_sizes) + 1))
+                        
+                        # 2. Bar chart of happiness per table
+                        ax2 = axes[1]
+                        ax2.bar(range(1, len(table_happiness) + 1), table_happiness, color='lightgreen')
+                        ax2.set_xlabel('Table Number')
+                        ax2.set_ylabel('Happiness Score')
+                        ax2.set_title(f'Happiness by Table')
+                        ax2.set_xticks(range(1, len(table_happiness) + 1))
+                        
+                        # 3. Pie chart: contribution to total happiness
+                        ax3 = axes[2]
+                        total_happiness = sum(table_happiness)
+                        if total_happiness > 0:  # Avoid division by zero
+                            percentages = [(h/total_happiness)*100 for h in table_happiness]
+                            ax3.pie(percentages, labels=[f"Table {i+1}" for i in range(len(percentages))],
+                                    autopct='%1.1f%%', startangle=90)
+                            ax3.set_title('Contribution to Total Happiness')
+                        else:
+                            ax3.text(0.5, 0.5, "No happiness data available", ha='center', va='center')
+                        
+                        # Add a super title with algorithm details
+                        plt.suptitle(
+                            f"{algo_name} Algorithm Analysis\n"
+                            f"Total Happiness: {algo_happiness:.2f} | "
+                            f"Execution Time: {algo_time:.2f}s | "
+                            f"Tables: {len(algo_tables)} | "
+                            f"Guests: {sum(len(t) for t in algo_tables)}",
+                            fontsize=16, y=0.98
+                        )
+                        
+                        # Update page label
+                        page_label.config(text=f"Page {page_num}/{total_pages}: {algo_name} Analysis")
+                    else:
+                        # This shouldn't happen with proper navigation but just in case
+                        fig, ax = plt.subplots()
+                        ax.text(0.5, 0.5, "No data for this page", ha='center', va='center', fontsize=16)
+                        page_label.config(text=f"Page {page_num}/{total_pages}: Invalid Page")
+                
+                # Adjust layout and embed in tkinter
+                plt.tight_layout()
+                canvas = FigureCanvasTkAgg(fig, master=chart_frame)
+                canvas.draw()
+                canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
             
-            # Add value labels on bars
-            for i, v in enumerate(execution_times):
-                ax2.text(i, v + 0.05, f"{v:.2f}s", ha='center')
+            # Add pagination controls
+            pagination_frame = ttk.Frame(toolbar_frame)
+            pagination_frame.pack(side=tk.RIGHT, padx=10)
             
-            # Adjust layout and embed in tkinter
-            plt.tight_layout()
-            canvas = FigureCanvasTkAgg(fig, master=chart_frame)
-            canvas.draw()
-            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            prev_button = ttk.Button(pagination_frame, text="← Previous", 
+                                    command=lambda: [current_page.set(max(1, current_page.get()-1)), 
+                                                    show_graph_page(current_page.get())])
+            prev_button.pack(side=tk.LEFT, padx=5)
+            
+            # Label to show current page
+            page_label = ttk.Label(pagination_frame, text=f"Page 1/{total_pages}: Basic Performance")
+            page_label.pack(side=tk.LEFT, padx=10)
+            
+            next_button = ttk.Button(pagination_frame, text="Next →", 
+                                    command=lambda: [current_page.set(min(total_pages, current_page.get()+1)), 
+                                                    show_graph_page(current_page.get())])
+            next_button.pack(side=tk.LEFT, padx=5)
+            
+            # Add quick navigation dropdown
+            page_options = ["1: Basic Performance", "2: Efficiency Analysis"] + [
+                f"{i+3}: {name} Analysis" for i, name in enumerate(detailed_analysis_algos)
+            ]
+            
+            # Add a separator in the pagination frame
+            ttk.Separator(pagination_frame, orient='vertical').pack(side=tk.LEFT, padx=10, fill='y')
+            
+            # Add "Go to:" label
+            ttk.Label(pagination_frame, text="Go to:").pack(side=tk.LEFT, padx=5)
+            
+            # Create the combobox for quick navigation
+            goto_page = ttk.Combobox(pagination_frame, values=page_options, width=20, state="readonly")
+            goto_page.pack(side=tk.LEFT, padx=5)
+            goto_page.current(0)
+            
+            # Function to handle combobox selection
+            def on_goto_page(event):
+                selected = goto_page.get()
+                page_num = int(selected.split(":")[0])
+                current_page.set(page_num)
+                show_graph_page(page_num)
+                
+            goto_page.bind("<<ComboboxSelected>>", on_goto_page)
+            
+            # Show first graph page
+            show_graph_page(1)
             
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred during comparison: {str(e)}")
             print(f"Comparison error: {str(e)}")
+            traceback.print_exc()  # Print detailed traceback for debugging
     
     def save_comparison_results(self, names, happiness_scores, execution_times, tables=None):
         """Saves the comparison results to a file with detailed information."""

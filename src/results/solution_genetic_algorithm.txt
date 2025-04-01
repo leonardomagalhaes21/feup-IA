@@ -1,83 +1,33 @@
 Solution for Genetic Algorithm Algorithm
 ===============================
 
-Happiness Score: 3829.00
-Execution Time: 68.29 seconds
+Happiness Score: 1139.00
+Execution Time: 11.99 seconds
 
 Table Assignments:
 
-Table 1: Eric Watson, Dorothy Johnson, Brittney Braun, Nicole Barnes, Jonathon Raymond, Erica Nelson, Brittney Perry, William Gonzalez
-Table 2: Kimberly Sosa, Holly Parker, Stephen Foley, Jason Mathews, Steven Stewart, Meghan Jackson, Holly Burnett, Sarah Martinez
-Table 3: Michael Morgan, Deborah Torres, Mrs. Sue Richards, Anthony Nguyen, Anthony Campbell, Jimmy Sutton, Kimberly Morgan, Timothy Mason
-Table 4: Mary Zavala, Bryan Hicks, Austin Tucker, Sean Wise, Rebekah Knapp, Jaime Petersen, Anthony Alvarez, Mary Newman
-Table 5: Edward II, Ashley Kennedy, Kelly Sanchez, Kimberly Durham, Natalie Carlson, Vanessa Cortez, Vincent Walker, Joseph Wright
-Table 6: Christopher Moody, Makayla Chavez, William Watson, Joseph Davis, Casey Williams, Robert Ray, Denise Burnett, Sydney Williams
-Table 7: William Melton, Joe Franco, Daniel Tran, Aaron Cortez, Anthony Nelson, Joseph Brown, Brian Reid, Makayla Campbell
-Table 8: Anthony Massey, Benjamin Wolf, Deanna Ruiz, Charles Leonard, Justin Holden, Jaime Campbell, Holly Nelson, Sydney Ramos
-Table 9: Sarah Johnson, Tamara Franco, Dennis Wolf, Luis Carlson, Nathaniel Matthews, Cindy Mitchell, Cindy Brooks, Christopher Bolton
-Table 10: Jane Wolf, Melanie Howard, Michelle Sutton, Michael Le, William Garcia, Sydney Nelson, Amy Cortez, Jason Gill
-Table 11: Andrea Larsen, Sarah Gill, Jonathon Evans, Jeremy Brown, Brittney Nelson, Cindy Davila, Brittney Knapp, Robert Richardson
-Table 12: Tamara Reyes, Mrs. Jones, Mariah Mckinney, Matthew Hanson, Scott Gonzalez, Destiny Sanchez, Jessica MD, Levi Shields
-Table 13: Nathaniel Nguyen, Kristen Ross, Ann Torres, Kristen Brown, Ashley Jarvis, Brandy Dalton, Kenneth Williamson, Timothy Evans
-Table 14: Emily Massey, Joseph Proctor, Theresa Hernandez, Anthony Stevenson, Wayne Hernandez, Marc Brown, Michelle Alvarez, Dorothy Bauer
-Table 15: Robert Zavala, Jonathon Williams, Robin Mason, Kenneth Snyder, Kimberly Simmons, Joseph Tucker, Jose MD, Jason PhD
-Table 16: Ms. Hicks, James Davila, Kelly Jones, Patrick Humphrey, Jonathan Meyers, Joseph Allen, Robin Miller, Heather Mack
-Table 17: Mary Matthews, Jacob Bonilla, Michael Newman, Edward Sanchez PhD, Ms. Kristina Edwards MD, Denise Mathews, Cindy King, Karen PhD
-Table 18: Stephen Jones, Denise Nelson, Theodore Ramos, Justin Romero, Luis Sanchez, Shannon Gutierrez, Christopher Raymond, Jessica Weber
-Table 19: Amy Cox, Austin Miles, Amy MD, Joseph Monroe, Christopher Holden, Alex Rich, Pamela Nguyen, Joseph Bolton
-Table 20: Lee Parker, Sean Spears, Daniel Ray, David Miller, Christopher Collins, Daniel Brown, Thomas Silva, Mary Good
-Table 21: Lee Collins, Mariah Weber, Emily Barnes, Luis Le, Amy Wise, Jason Osborn, Emily Garcia, Kevin Carr
-Table 22: Wayne MD, Marcus Carey, Robert Leonard, Mary Hickman, Daniel Sutton, Robert Yang, William Reyes, Dorothy Nelson
-Table 23: Jimmy Carlson, Sydney Reese, Tonya Gonzalez, Jessica Brown, Rebekah Jarvis, Angelica Gordon, Jason Meyers, Stephanie Nelson
-Table 24: Stephen Gutierrez, Stephanie Farmer MD, Kenneth Ellis II, Catherine Holden, Dawn Pineda, Jeffery White, Patrick Brown, Shelby Petersen
-Table 25: Benjamin Hicks, Makayla Cortez, Amy Miles, Patrick Benton, Denise Walker, Emily White, Jean Mullins, Sarah Sanchez
-Table 26: Joanna Le, Andrea Richards, Mary Cochran, Shawn Rubio, Emily Melton, Deborah Ross, Casey Reyes, Tammy Sherman
-Table 27: Karen Holden, Brian Gomez, Shelly Watson, Thomas Gonzalez, Robert Bauer, Terry Richardson, Patrick DDS, Emily Ruiz
-Table 28: Levi II, Darlene Mitchell, Michele Franco, Sarah Mitchell, Austin Alvarez, Darlene Nichols, Brianna Jackson, Robert Roman
-Table 29: Jose Patterson, Olivia Campbell, Michael Weber, Robert Rich, Jimmy Stewart, Brittney White, Cynthia Alexander, Anthony Jones
-Table 30: Claire Collins, Timothy Barnes, Angela Alvarez, Michael Rubio, Jessica Yang, Sarah Ross, Vanessa Williams, Andrew Mullins
-Table 31: Kelly Jarvis, Michael Powell, Joseph Nguyen, Michele Alexander, Casey Thomas, Cynthia Hawkins, Aaron Hickman, Mary Larsen
-Table 32: Kenneth Neal, Timothy Cochran, Patrick Rosales, Daniel Cortez, Michael Mitchell, Pamela Hines, Michael Washington, Breanna Ray
-Table 33: Melanie Cunningham, Anthony Leonard, Tonya Hanson, Jessica Le, Zachary Anderson, Dr. Ryan Garcia, Heather Patterson, Shelby Reese
-Table 34: Steven Reyes, Sarah Gutierrez, Sarah Pruitt, Shawn Davenport, Stephen Massey, Jacob Matthews, Vincent Wright, Jaime Leonard
-Table 35: Michael Fisher, Casey Washington, Jamie Raymond, Melanie Nguyen, Mary Holden, Allison Simmons, Andrew Alvarez, Dennis Mcgee
-Table 36: Daniel Williams, Dennis Coffey, Sean Romero, Emily Medina, Austin Spears, Destiny Fisher, Nathaniel Parker, Anne Rubio
-Table 37: Melanie Massey, Natalie Manning, Whitney Good, Wayne Silva, Frank Gill, Daniel Petersen, Sydney Reyes, Glenn Munoz
-Table 38: Aaron Proctor, Jessica Gomez, David Reid, William Medina, Richard Zimmerman, Dawn Gonzalez, Robert Nelson, Michele Carr
-Table 39: Angela Kelley, Jeremy Zimmerman, Edward Powell, Dorothy Gomez, Robert Davenport, Rebekah Medina, Robert Washington, Eric Martin
-Table 40: Brandy Nelson, Katelyn Anderson, Candice Mathews, Jessica Reid, Christopher Reyes, David Sanchez, Stephen Sanchez, Shawn Mason
-Table 41: Amy Perez, Billy Rios, Joanna Roman, Jeffrey Carey, Kimberly Snyder, Preston Walker, Melanie Gonzalez, Deanna Reyes
-Table 42: Vincent Brown, Sean Ross, Whitney Lyons, Jason DDS, Preston Campbell, Michael Carlson, Henry Good, Sydney Zimmerman
-Table 43: Brenda Rich, Karen Johnson, Jonathon Sutton, Tyler Johnson DDS, Amy Lyons, Jeffrey Nelson, Mrs. Good, Alex Sanchez
-Table 44: Angela Benton, Mary Williams, Andrew Martin, Jaime Fisher, Brandy Harrison, Lee Neal, Joseph Evans, James Lee
-Table 45: Thomas King, Alexis Medina, Aaron Perry, Michael Williams, Brandy Armstrong, Jose Gill, Tamara Garcia, Gregory Harrison
-Table 46: Brandy Thomas, Nicole Gonzalez, Mary Clements, Kelly Wright, Benjamin Burke, Michael Davila, Joseph Ross, Katelyn Williams
-Table 47: Michael Garcia, Sarah Leonard, Wayne Williamson, Edward Torres, Holly Cox, Jordan Jarvis, Mrs. Alexander, Austin Rich
-Table 48: Kimberly Sherman, Austin Mckinney, Michael Brown, Candice Durham, Jason Cunningham, Amy Mcgee, Michael Martin, Jacqueline Gomez
-Table 49: Vincent Hickman, Brandy Gutierrez, Luis Williams, Anthony Mata, Destiny Jones, Melanie Carlson, David Miles, Edward Medina
-Table 50: Candice Hicks, Joanna Kennedy, Candice Nichols, Denise Carr, Christopher White, Jason Morgan, Jacob Williams, Robert Fisher
-Table 51: Michael Robinson, Preston Jackson, Brianna Osborn, Charles MD, Olivia Walker, Jeffery Reese, Jessica Zavala, Robert Neal
-Table 52: Jason Mason, Deanna Morgan, Steven Giles, Nathaniel Collins, Marcus Parker, Christopher Perry, Alex Brooks, Chris Alvarez
-Table 53: Sarah Romero, Jason Simmons, Karen Ramos, Tyler Alvarez, Daniel Miles, Jeffery Dalton, Stephen Pineda, Eric Jones
-Table 54: Amy Pruitt, Rebecca Mullins, Shelly Armstrong, Jamie Stewart, Wesley Leonard, Casey Burke, Makayla Richardson, Mrs. Melanie Evans
-Table 55: Marc Howard, Sean Martinez, Billy Finley, Mary Meyers, Amy Rich, David Cox, James Manning, Anthony Davis
-Table 56: Rebecca Ramos, Heather Neal, Casey Richardson, Vanessa Richardson, Jordan Foley, Sarah Rosales, Allison Johnson, Shawn PhD
-Table 57: Michael Shields, Jessica Finley, Daniel Newman, Fernando Melton, Denise Mcguire, Daniel Choi, Kevin Wells, Brenda King
-Table 58: Jaime Perry, Ethan Johnson, Austin Wright, Gabriel Watson, Karen Rios, Alexis Sutton, Jason Nelson, Thomas Alexander
-Table 59: Angelica Watson, Kenneth King, Vanessa Reid, Karen Perez, Luis Armstrong, Daniel Hickman, Timothy Howard, Jacqueline Choi
-Table 60: Preston Parker, Andrea Hines, Jose Mata, Karen Sanchez, Jean Harrison, Pamela Johnson, Dorothy Williams, Aaron Bailey
-Table 61: Mariah Tucker, Karen Perry, Deborah Melton, Thomas Giles, Angela Jones, Wayne Ray, Jeffery Cox, Mariah Walker
-Table 62: Levi Carr, Terry Monroe, Robin Newman, Denise II, Jaime Reyes, Meghan Evans, Joseph Yang, Jaime Walker
-Table 63: Christopher Cox, Richard Allen, Shelly Franco, Casey Knapp, Angela Mckinney, Ricky Bonilla, Aaron Ballard MD, Ricky Shields
-Table 64: Andrea Morgan, Luis Simmons, Joe Simmons, Casey Walker, Preston Washington, Jane Miles, Jane Torres, Holly Martinez
-Table 65: Heather Petersen, Christopher Huff, Ann Collins, Brandy Bolton, Anthony Ross, Michael Choi, Anthony PhD, Vanessa King
-Table 66: Daniel Sanchez, Thomas Moody, Christopher Martin, Michelle Giles, Terry Williamson, Tyler Nelson, Makayla Munoz, Karen Matthews
-Table 67: Michele Powell, Breanna Washington, Frank Gonzalez, Jacqueline White, Wesley Burnett, Richard Williams, Gabriel Hernandez, James Graham
-Table 68: Michael Mcgee, David Franco, Sydney Mathews, Anne Munoz, Nicole Perry, Robert Parker, Jason Rich, Shelby Wells
-Table 69: Wesley Stevenson, Stephen Newman, Katelyn Finley, Pamela Fleming, Aaron Williams, Ricky Munoz, Erica Burnett, Jean Weber
-Table 70: David Allen, Glenn Bailey, Austin Fisher, Michael Lyons, Destiny Wolf, Sarah White, Michele Wright, Henry Moody
-Table 71: Sydney Patterson, Michelle Evans, Dawn Matthews, Theodore Nelson, Sean II, Shannon Manning, Breanna Massey, Karen Brown
-Table 72: Robert Rubio, Robert Humphrey, Jason Williamson, Kristen Brooks, Andrew Shields, Daniel Wright, Robert Williams, Mary Ruiz
-Table 73: James Walker, Christopher Brown, Jacob Newman, Edward Sutton, Mary Franco, Christopher Howard, Joseph Alexander, Patrick Nelson
-Table 74: Kevin Munoz, Karen Tran, Robert Martin MD, Michael Parker, Angelica Williams, Joseph Romero, Preston Torres, Michael Good
-Table 75: Mary PhD, Timothy Kelley, Scott Mcguire, Timothy Hernandez, Tammy Gill, Kevin Mathews, Whitney Reyes, Erica Hines
+Table 1: Anthony Stevenson, Michelle Alvarez, Justin Romero, Jason Williamson, Andrew Shields, Kristen Brooks, Christopher Huff, Daniel Cortez
+Table 2: Michael Williams, Sydney Reese, Jessica Brown, Glenn Bailey, Stephen Massey, Angelica Gordon, Tonya Gonzalez, Jacob Matthews
+Table 3: Richard Allen, Karen Perry, Anthony Davis, Sean Martinez, Casey Walker, Aaron Ballard MD, Joe Simmons, Melanie Howard
+Table 4: Jose Mata, Andrea Hines, Karen Sanchez, Billy Rios, Mary Williams, Mrs. Melanie Evans, Shelly Armstrong, Tamara Franco
+Table 5: Natalie Carlson, Charles Leonard, Heather Mack, Ashley Kennedy, Chris Alvarez, Ashley Jarvis, Nathaniel Nguyen, Brandy Dalton
+Table 6: James Graham, Ms. Kristina Edwards MD, Wayne Silva, Edward Sanchez PhD, Rebecca Mullins, Aaron Perry, Thomas Gonzalez, Joseph Ross
+Table 7: Dennis Coffey, Christopher Cox, Michael Robinson, Austin Spears, Destiny Fisher, Shawn Davenport, Gregory Harrison, Preston Jackson
+Table 8: Robert Bauer, Brianna Osborn, Thomas Moody, Kenneth Ellis II, Stephanie Farmer MD, Jeffery White, Gabriel Watson, Daniel Williams
+Table 9: Anne Munoz, Jason Mason, Patrick Humphrey, Casey Thomas, Vanessa Richardson, Jonathan Meyers, Robin Miller, Emily Barnes
+Table 10: Austin Tucker, Bryan Hicks, Theresa Hernandez, Darlene Nichols, Matthew Hanson, Denise Walker, Jimmy Sutton, Sean Wise
+Table 11: Alexis Medina, Jessica Zavala, Ricky Bonilla, Sydney Reyes, Robert Martin MD, Claire Collins, Daniel Tran, Michelle Giles
+Table 12: Allison Johnson, Michael Parker, Brenda King, Kevin Wells, Jordan Foley, Daniel Newman, Robert Rich, Jessica Finley
+Table 13: Jeffrey Nelson, Whitney Lyons, Joseph Brown, Frank Gonzalez, Wesley Burnett, Karen Johnson, Henry Good, Brian Gomez
+Table 14: Holly Parker, David Reid, Mary Cochran, Shawn Rubio, Casey Reyes, Kelly Wright, Sarah Mitchell, Tammy Sherman
+Table 15: Timothy Mason, Joseph Proctor, Michael Morgan, Deborah Torres, Mrs. Sue Richards, Brandy Bolton, Anthony Ross, Ann Collins
+Table 16: James Lee, Angela Benton, Lee Neal, Jane Wolf, Jason Gill, Jonathon Williams, Sydney Patterson, Eric Jones
+Table 17: Shelby Petersen, Breanna Massey, Pamela Fleming, Shannon Manning, Cynthia Hawkins, Sarah Gutierrez, Kimberly Snyder, Makayla Chavez
+Table 18: Terry Monroe, Levi Carr, Andrea Larsen, Vincent Hickman, Mariah Mckinney, David Miles, Daniel Ray, Cindy Davila
+Table 19: Steven Stewart, Luis Le, Mary Newman, Olivia Campbell, Deanna Ruiz, Rebekah Knapp, Candice Durham, Meghan Jackson
+Table 20: Fernando Melton, Robert Yang, Amy Mcgee, Karen Brown, Marcus Carey, Dorothy Nelson, Jean Weber, William Reyes
+Table 21: Jeremy Zimmerman, Timothy Kelley, Erica Hines, Scott Mcguire, Kevin Mathews, Robert Washington, Emily White, Jaime Fisher
+Table 22: Amy Perez, Zachary Anderson, Joanna Roman, Kenneth King, Melanie Cunningham, Dr. Ryan Garcia, Michele Alexander, Kimberly Sosa
+Table 23: Tyler Johnson DDS, Brittney Braun, Marc Brown, Jamie Raymond, Patrick Rosales, Alex Sanchez, Andrew Martin, Sarah Pruitt
+Table 24: Joseph Nguyen, Mary Franco, Luis Carlson, Ethan Johnson, Catherine Holden, Dawn Pineda, Jacqueline Choi, Michael Powell
+Table 25: Denise Nelson, Stephen Jones, Theodore Ramos, Benjamin Burke, Christopher Collins, Mary Clements, Nicole Gonzalez, Katelyn Williams

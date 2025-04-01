@@ -2,26 +2,26 @@ Algorithm Comparison Results
 ===========================
 
 Table Size: 8
-Number of Guests: 600
+Number of Guests: 200
 
 Dataset Information:
-  Guest List: ../dataset/large/guestlist_large.csv
-  Likes: ../dataset/large/likes_large.csv
-  Dislikes: ../dataset/large/dislikes_large.csv
+  Guest List: ../dataset/small/guestlist_small.csv
+  Likes: ../dataset/small/likes_small.csv
+  Dislikes: ../dataset/small/dislikes_small.csv
 
 Results Summary:
 ------------------------------------------------------------------------------------
 Algorithm               | Happiness Score | Execution Time (s) | Solution File
 ------------------------------------------------------------------------------------
-Random                   |           4.00 |             0.00 | solution_random.txt
-Hill Climbing            |        3759.00 |           145.79 | solution_hill_climbing.txt
-Simulated Annealing      |        3811.00 |            39.57 | solution_simulated_annealing.txt
-Tabu Search              |        3660.00 |            59.92 | solution_tabu_search.txt
-Genetic Algorithm        |        3829.00 |            68.29 | solution_genetic_algorithm.txt
-K-means                  |        3866.00 |            16.20 | solution_k-means.txt
-Greedy                   |        3741.00 |            40.81 | solution_greedy.txt
+Random                   |         -58.00 |             0.00 | solution_random.txt
+Hill Climbing            |        1091.00 |             6.16 | solution_hill_climbing.txt
+Simulated Annealing      |        1073.00 |             1.68 | solution_simulated_annealing.txt
+Tabu Search              |        1038.00 |             7.31 | solution_tabu_search.txt
+Genetic Algorithm        |        1139.00 |            11.99 | solution_genetic_algorithm.txt
+K-means                  |        1287.00 |             1.40 | solution_k-means.txt
+Greedy                   |        1061.00 |             1.52 | solution_greedy.txt
 ------------------------------------------------------------------------------------
 
 Conclusion:
-Best performing algorithm (happiness): K-means with score 3866.00
+Best performing algorithm (happiness): K-means with score 1287.00
 Fastest algorithm: Random with time 0.00 seconds
