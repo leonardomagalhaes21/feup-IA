@@ -13,15 +13,15 @@ Results Summary:
 ------------------------------------------------------------------------------------
 Algorithm               | Happiness Score | Execution Time (s) | Solution File
 ------------------------------------------------------------------------------------
-Random                   |         -64.00 |             0.00 | solution_random.txt
-Hill Climbing            |        3764.00 |           134.13 | solution_hill_climbing.txt
-Simulated Annealing      |        3657.00 |            42.14 | solution_simulated_annealing.txt
-Tabu Search              |        3575.00 |            56.10 | solution_tabu_search.txt
-Genetic Algorithm        |        3771.00 |            72.30 | solution_genetic_algorithm.txt
-K-means                  |        3875.00 |            15.35 | solution_k-means.txt
-Greedy                   |        3565.00 |            37.00 | solution_greedy.txt
+Random                   |           4.00 |             0.00 | solution_random.txt
+Hill Climbing            |        3759.00 |           145.79 | solution_hill_climbing.txt
+Simulated Annealing      |        3811.00 |            39.57 | solution_simulated_annealing.txt
+Tabu Search              |        3660.00 |            59.92 | solution_tabu_search.txt
+Genetic Algorithm        |        3829.00 |            68.29 | solution_genetic_algorithm.txt
+K-means                  |        3866.00 |            16.20 | solution_k-means.txt
+Greedy                   |        3741.00 |            40.81 | solution_greedy.txt
 ------------------------------------------------------------------------------------
 
 Conclusion:
-Best performing algorithm (happiness): K-means with score 3875.00
+Best performing algorithm (happiness): K-means with score 3866.00
 Fastest algorithm: Random with time 0.00 seconds

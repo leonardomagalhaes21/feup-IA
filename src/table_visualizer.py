@@ -24,6 +24,92 @@ class TableVisualizer:
         self.fig = None
         self.axes = None
 
+    def optimize_seating(self, table):
+        """
+        Optimizes seating arrangement to maximize distance between guests with negative relationships.
+        Returns a reordered list of the original table guests.
+        """
+        if self.relationship_matrix is None or self.guests is None or len(table) <= 2:
+            return table  # Return original order if no relationship data or too few guests
+            
+        # Map guests to their indices in the overall guest list
+        guest_indices = [self.guests.index(guest) for guest in table]
+        n = len(table)
+        
+        # Create a list of guest pairs with their relationship scores, focusing on negative ones
+        relationships = []
+        for i in range(n):
+            for j in range(i+1, n):
+                idx1, idx2 = guest_indices[i], guest_indices[j]
+                rel_score = self.relationship_matrix[idx1][idx2]
+                # Prioritize negative relationships
+                relationships.append((i, j, rel_score))
+        
+        # Sort relationships, with most negative first
+        relationships.sort(key=lambda x: x[2])
+        
+        # Start with placing the first two guests with worst relationship opposite each other
+        if relationships and relationships[0][2] < 0:
+            worst_pair = relationships[0]
+            guest1, guest2 = worst_pair[0], worst_pair[1]
+            
+            # Initialize the arrangement with guests placed as far apart as possible
+            arrangement = [None] * n
+            arrangement[0] = guest1
+            opposite_pos = n // 2
+            arrangement[opposite_pos] = guest2
+            
+            # Keep track of available positions
+            available_positions = list(range(1, n))
+            available_positions.remove(opposite_pos)
+            
+            # Remove the assigned guests from consideration
+            assigned_guests = {guest1, guest2}
+            
+            # Continue placing guests based on their relationships
+            while len(assigned_guests) < n:
+                best_score = float('-inf')
+                best_guest = None
+                best_position = None
+                
+                # For each unassigned guest
+                for guest_idx in range(n):
+                    if guest_idx in assigned_guests:
+                        continue
+                        
+                    # Try all available positions
+                    for pos in available_positions:
+                        score = 0
+                        
+                        # Calculate score based on distances to already placed guests
+                        for assigned_guest in assigned_guests:
+                            assigned_pos = arrangement.index(assigned_guest)
+                            # Calculate circular distance
+                            dist = min(abs(pos - assigned_pos), n - abs(pos - assigned_pos))
+                            # Get relationship score
+                            rel = self.relationship_matrix[guest_indices[guest_idx]][guest_indices[assigned_guest]]
+                            
+                            # For negative relationships, we want larger distances
+                            if rel < 0:
+                                score += dist * (-rel)  # Weight by magnitude of negative relationship
+                            else:
+                                score += (n - dist) * rel  # For positive relations, prefer closer
+                        
+                        if score > best_score:
+                            best_score = score
+                            best_guest = guest_idx
+                            best_position = pos
+                
+                # Assign the best guest to the best position
+                arrangement[best_position] = best_guest
+                assigned_guests.add(best_guest)
+                available_positions.remove(best_position)
+            
+            # Return the reordered table
+            return [table[arrangement[i]] for i in range(n)]
+            
+        return table  # If no negative relationships, return original order
+
     def draw_page(self, page_idx):
         """Draws the tables for the specified page index."""
         self.fig.clf()
@@ -48,6 +134,10 @@ class TableVisualizer:
             # Draw table circle.
             table_circle = plt.Circle((0, 0), 1.8, color='lightblue', fill=True, alpha=0.5)
             ax.add_artist(table_circle)
+
+            # Optimize the seating arrangement if relationship data is available
+            if self.relationship_matrix is not None and self.guests is not None:
+                table = self.optimize_seating(table)
 
             num_seats = len(table)
             angles = np.linspace(0, 2 * np.pi, num_seats, endpoint=False)
