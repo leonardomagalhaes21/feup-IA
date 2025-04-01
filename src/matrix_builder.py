@@ -76,7 +76,7 @@ class MatrixBuilder:
 
         # Handle group
         if details1['Group'] == details2['Group']:
-            score += 1
+            score += 4
 
         # Handle interests
         if details1['Interests'] == details2['Interests']:
