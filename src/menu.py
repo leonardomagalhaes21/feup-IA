@@ -801,87 +801,124 @@ class Menu:
             traceback.print_exc()  # Print detailed traceback for debugging
     
     def save_comparison_results(self, names, happiness_scores, execution_times, tables=None):
-        """Saves the comparison results to a file with detailed information."""
+        """Saves the comparison results to CSV files with detailed metrics."""
         try:
             import os
+            import csv
             
             # Create results directory if it doesn't exist
             results_dir = "results"
             if not os.path.exists(results_dir):
                 os.makedirs(results_dir)
             
-            # Create main comparison file - simplified name without timestamp
-            main_filename = os.path.join(results_dir, "algorithm_comparison.txt")
+            # 1. Main comparison CSV - overall algorithm performance
+            main_filename = os.path.join(results_dir, "algorithm_comparison.csv")
             
-            with open(main_filename, "w") as f:
-                f.write("Algorithm Comparison Results\n")
-                f.write("===========================\n\n")
+            # Calculate efficiency (happiness per second)
+            efficiency = [h/t if t > 0 else 0 for h, t in zip(happiness_scores, execution_times)]
+            
+            with open(main_filename, "w", newline='') as f:
+                writer = csv.writer(f)
+                # Write header
+                writer.writerow(['Algorithm', 'Happiness Score', 'Execution Time (s)', 'Efficiency (Happiness/Second)'])
                 
-                # Write table size information
-                table_size = int(self.entry_table_size.get()) if hasattr(self, 'entry_table_size') else 8
-                f.write(f"Table Size: {table_size}\n")
-                
-                # Get number of guests if available
-                num_guests = "N/A"
-                if hasattr(self, 'guests') and self.guests:
-                    num_guests = len(self.guests)
-                elif tables and tables[0]:
-                    # Count total unique guests across all tables in the first solution
-                    all_guests = set()
-                    for table in tables[0]:
-                        all_guests.update(table)
-                    num_guests = len(all_guests)
-                    
-                f.write(f"Number of Guests: {num_guests}\n\n")
-                
-                # Write dataset information
-                f.write("Dataset Information:\n")
-                f.write(f"  Guest List: {self.guestlist_path.get()}\n")
-                f.write(f"  Likes: {self.likes_path.get()}\n")
-                f.write(f"  Dislikes: {self.dislikes_path.get()}\n\n")
-                
-                # Write algorithm results table
-                f.write("Results Summary:\n")
-                f.write("------------------------------------------------------------------------------------\n")
-                f.write("Algorithm               | Happiness Score | Execution Time (s) | Solution File\n")
-                f.write("------------------------------------------------------------------------------------\n")
-                
-                # For each algorithm, write its results and create a solution file
+                # Write data for each algorithm
                 for i, name in enumerate(names):
-                    # Create solution file with simplified name for this algorithm
-                    solution_filename = f"solution_{name.replace(' ', '_').lower()}.txt"
-                    solution_path = os.path.join(results_dir, solution_filename)
-                    
-                    # Format the result row with proper spacing for table-like format
-                    f.write(f"{name: <25}| {happiness_scores[i]:14.2f} | {execution_times[i]:16.2f} | {solution_filename}\n")
-                    
-                    # Skip solution file if we don't have table assignments
-                    if tables is None or i >= len(tables):
-                        continue
-                        
-                    # Write detailed solution to the solution file
-                    with open(solution_path, "w") as sol_file:
-                        sol_file.write(f"Solution for {name} Algorithm\n")
-                        sol_file.write("===============================\n\n")
-                        sol_file.write(f"Happiness Score: {happiness_scores[i]:.2f}\n")
-                        sol_file.write(f"Execution Time: {execution_times[i]:.2f} seconds\n\n")
-                        sol_file.write("Table Assignments:\n\n")
-                        
-                        for table_idx, table in enumerate(tables[i]):
-                            sol_file.write(f"Table {table_idx + 1}: {', '.join(table)}\n")
-                
-                f.write("------------------------------------------------------------------------------------\n\n")
-                
-                # Add a conclusion section highlighting the best algorithm
-                best_idx = happiness_scores.index(max(happiness_scores))
-                fastest_idx = execution_times.index(min(execution_times))
-                
-                f.write("Conclusion:\n")
-                f.write(f"Best performing algorithm (happiness): {names[best_idx]} with score {happiness_scores[best_idx]:.2f}\n")
-                f.write(f"Fastest algorithm: {names[fastest_idx]} with time {execution_times[fastest_idx]:.2f} seconds\n")
+                    writer.writerow([name, happiness_scores[i], execution_times[i], efficiency[i]])
             
-            messagebox.showinfo("Success", f"Results saved to {main_filename}")
+            # 2. Get optimizer for table-level calculations if tables are provided
+            optimizer = None
+            if tables is not None and len(tables) > 0:
+                try:
+                    optimizer = self.get_optimizer()
+                except Exception as e:
+                    print(f"Warning: Could not create optimizer for detailed metrics: {str(e)}")
+            
+            # 3. Create detailed CSV for each algorithm (excluding Random)
+            if optimizer is not None and tables is not None:
+                for i, name in enumerate(names):
+                    # Skip Random algorithm
+                    if name == "Random":
+                        continue
+                    
+                    # Create algorithm-specific CSV
+                    algo_filename = os.path.join(results_dir, f"{name.replace(' ', '_').lower()}_details.csv")
+                    
+                    with open(algo_filename, "w", newline='') as f:
+                        writer = csv.writer(f)
+                        
+                        # Calculate table-level metrics
+                        algo_tables = tables[i]
+                        table_sizes = [len(table) for table in algo_tables if table]
+                        
+                        # Calculate happiness per table
+                        table_happiness = []
+                        for table in algo_tables:
+                            if not table:  # Skip empty tables
+                                continue
+                            
+                            # Get indices of guests at this table
+                            guest_indices = [optimizer.guests.index(guest) for guest in table]
+                            
+                            # Calculate total happiness for this table
+                            score = 0
+                            for idx1_pos, idx1 in enumerate(guest_indices):
+                                for idx2 in guest_indices[idx1_pos+1:]:
+                                    score += optimizer.relationship_matrix[idx1][idx2]
+                            
+                            table_happiness.append(score)
+                        
+                        # Calculate percentage contribution to total happiness
+                        total_happiness = sum(table_happiness) if table_happiness else 0
+                        percentage_contributions = [(h/total_happiness)*100 if total_happiness > 0 else 0 for h in table_happiness]
+                        
+                        # Write header
+                        writer.writerow(['Table Number', 'Guest Count', 'Happiness Score', 'Contribution (%)'])
+                        
+                        # Write data for each table
+                        for table_idx in range(len(table_sizes)):
+                            writer.writerow([
+                                f'Table {table_idx+1}', 
+                                table_sizes[table_idx],
+                                table_happiness[table_idx] if table_idx < len(table_happiness) else 0,
+                                percentage_contributions[table_idx] if table_idx < len(percentage_contributions) else 0
+                            ])
+                        
+                        # Write summary row
+                        writer.writerow(['Total', sum(table_sizes), total_happiness, 100.0])
+                    
+                    # Create a separate CSV for the guest assignments
+                    assignments_filename = os.path.join(results_dir, f"{name.replace(' ', '_').lower()}_assignments.csv")
+                    
+                    with open(assignments_filename, "w", newline='') as f:
+                        writer = csv.writer(f)
+                        
+                        # Write header
+                        writer.writerow(['Guest', 'Table Number'])
+                        
+                        # Write guest assignments
+                        for table_idx, table in enumerate(algo_tables):
+                            for guest in table:
+                                writer.writerow([guest, f'Table {table_idx+1}'])
+            
+            # 4. Create a performance tradeoff CSV
+            tradeoff_filename = os.path.join(results_dir, "performance_tradeoff.csv")
+            
+            with open(tradeoff_filename, "w", newline='') as f:
+                writer = csv.writer(f)
+                # Write header
+                writer.writerow(['Algorithm', 'Happiness Score', 'Execution Time (s)', 'Efficiency'])
+                
+                # Write data excluding Random algorithm
+                for i, name in enumerate(names):
+                    if name != "Random":  # Exclude random for meaningful comparison
+                        writer.writerow([name, happiness_scores[i], execution_times[i], efficiency[i]])
+            
+            # Show success message
+            messagebox.showinfo("Success", f"Results saved to CSV files in the '{results_dir}' directory")
+            
             return main_filename
+            
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save results: {str(e)}")
             print(f"Error saving results: {str(e)}")
