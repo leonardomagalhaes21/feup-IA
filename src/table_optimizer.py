@@ -9,6 +9,10 @@ class TableOptimizer:
     """Class containing different optimization algorithms for table assignment problems."""
     
     def __init__(self, relationship_matrix, guests, table_size=8):
+        SEED = 420
+        random.seed(SEED)
+        np.random.seed(SEED)
+
         self.relationship_matrix = relationship_matrix
         self.guests = guests
         self.table_size = table_size
@@ -69,7 +73,7 @@ class TableOptimizer:
         
         return new_tables
     
-    def hill_climbing(self, iterations=1000, max_stagnation=100, num_neighbors=5, restarts=3):
+    def hill_climbing(self, iterations=1000, max_stagnation=100, num_neighbors=3, restarts=2):
         """
         Improved hill climbing algorithm with steepest ascent and random restarts.
         
@@ -122,8 +126,8 @@ class TableOptimizer:
         
         return best_solution, best_score
     
-    def simulated_annealing(self, initial_temp=100, cooling_rate=0.95, iterations=1000, 
-                            neighbors_per_iter=3, max_stagnation=100, reheat_factor=1.5):
+    def simulated_annealing(self, initial_temp=200, cooling_rate=0.98, iterations=1000, 
+                            neighbors_per_iter=7, max_stagnation=100, reheat_factor=1.5):
         """
         Implement enhanced simulated annealing algorithm with:
         - Multiple neighbor evaluation
@@ -141,22 +145,37 @@ class TableOptimizer:
         Returns:
             Tuple of (best solution, best score)
         """
-        # Start with the greedy solution instead of a random one
+        
+        # Start with the greedy solution for a better initial point
         current_solution = self.assign_tables_greedy()
         current_score = self.calculate_total_happiness(current_solution)
         best_solution = copy.deepcopy(current_solution)
         best_score = current_score
         
+        # Run hill climbing first to get to a good starting position
+        hc_solution, hc_score = self.hill_climbing(iterations=100, max_stagnation=20, restarts=1)
+        if hc_score > best_score:
+            current_solution = hc_solution
+            current_score = hc_score
+            best_solution = copy.deepcopy(current_solution)
+            best_score = current_score
+        
+        # Improved parameters
         temperature = initial_temp
         stagnation_counter = 0
         global_stagnation = 0
+        # Lower cooling rate means slower temperature decrease = better exploration
+        # Increase number of neighbors to consider at each step
         
-        for _ in tqdm(range(iterations), desc="Simulated Annealing"):
+        for it in tqdm(range(iterations), desc="Simulated Annealing"):
             # Generate multiple neighbors and pick the best one
             best_neighbor = None
             best_neighbor_score = float('-inf')
             
-            for _ in range(neighbors_per_iter):
+            # Examine more neighbors when at higher temperatures to explore more widely
+            current_neighbors = neighbors_per_iter + int(5 * (temperature / initial_temp))
+            
+            for _ in range(current_neighbors):
                 neighbor_solution = self.get_neighbor_solution(current_solution)
                 neighbor_score = self.calculate_total_happiness(neighbor_solution)
                 
@@ -175,7 +194,8 @@ class TableOptimizer:
             if delta > 0:
                 acceptance_probability = 1.0
             else:
-                acceptance_probability = math.exp(delta / temperature)
+                # More aggressive acceptance of worse solutions when at higher temperatures
+                acceptance_probability = math.exp(delta / (temperature * 0.7))
             
             # Decide whether to accept the neighbor
             if random.random() < acceptance_probability:
@@ -188,7 +208,7 @@ class TableOptimizer:
                 else:
                     stagnation_counter += 1
             else:
-                stagnation_counter += 1
+                stagnation_counter += 0.5  # Slower stagnation count when rejecting moves
             
             # Update best solution if current is better
             if current_score > best_score:
@@ -198,26 +218,59 @@ class TableOptimizer:
             else:
                 global_stagnation += 1
             
-            # Reheat if stuck in local optima
+            # Periodically try to inject diversity even when not stagnated
+            if it % 50 == 0 and random.random() < 0.3:
+                # Make a strong perturbation occasionally
+                perturbed = self._strong_perturbation(current_solution)
+                perturbed_score = self.calculate_total_happiness(perturbed)
+                
+                # Accept with some probability based on score
+                if perturbed_score > current_score * 0.9:
+                    current_solution = perturbed
+                    current_score = perturbed_score
+            
+            # Reheat if stuck in local optima - more aggressive reheating
             if stagnation_counter >= max_stagnation:
-                temperature *= reheat_factor
+                # Higher reheat factor for better escape from local optima
+                temperature = initial_temp * 0.8  # Reheat to 80% of initial temperature
                 stagnation_counter = 0
+                
+                # Strong perturbation when reheating
+                current_solution = self._strong_perturbation(current_solution)
+                current_solution = self._strong_perturbation(current_solution)  # Apply twice for more diversity
+                current_score = self.calculate_total_happiness(current_solution)
             else:
-                # Regular cooling
+                # Slower cooling schedule
                 temperature *= cooling_rate
             
-            # Early stopping or reset if no global improvement
+            # Early stopping or reset if no global improvement for a long time
             if global_stagnation >= 2 * max_stagnation:
-                if random.random() < 0.5:  # 50% chance to reset
-                    current_solution = self.assign_tables_greedy()  # Reset to greedy solution
-                    current_score = self.calculate_total_happiness(current_solution)
-                    temperature = initial_temp  # Reset temperature too
-                    global_stagnation = 0
+                # Start from best solution with perturbation rather than greedy
+                if random.random() < 0.7:  # 70% chance to use best solution as base
+                    current_solution = self._strong_perturbation(best_solution)
+                else:  # 30% chance to start fresh with greedy
+                    current_solution = self.assign_tables_greedy()
+                
+                current_score = self.calculate_total_happiness(current_solution)
+                temperature = initial_temp * 0.5  # Start at half temperature after reset
+                global_stagnation = 0
             
-            # Stop if temperature is too low
+            # Stop if temperature is too low and we're not finding improvements
             if temperature < 0.01:
-                break
+                temperature = initial_temp * 0.1  # Reheat to 10% of initial temp instead of stopping
         
+        # Final hill climbing phase to optimize the best solution found
+        final_solution, final_score = self.hill_climbing(
+            iterations=100, 
+            max_stagnation=20, 
+            num_neighbors=5, 
+            restarts=1
+        )
+        
+        if final_score > best_score:
+            best_solution = final_solution
+            best_score = final_score
+            
         return best_solution, best_score
     
     def tabu_search(self, tabu_size=15, iterations=1000, max_stagnation=100, strategic_oscillation=True):
@@ -738,4 +791,4 @@ class TableOptimizer:
             self.tables[table_idx].append(guest_name)
         
         return self.tables
-    
+
