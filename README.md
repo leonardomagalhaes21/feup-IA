@@ -8,7 +8,6 @@ A tool for optimizing seating arrangements based on guest relationships. This ap
   - **main.py**: Entry point of the application
   - **menu.py**: GUI interface for the application
   - **matrix_builder.py**: Builds relationship matrices from input data
-  - **seat_planner.py**: Handles planning the seating arrangements
   - **table_optimizer.py**: Implements various optimization algorithms
   - **table_visualizer.py**: Visualizes the seating arrangements
   
