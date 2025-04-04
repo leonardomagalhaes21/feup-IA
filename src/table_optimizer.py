@@ -127,7 +127,7 @@ class TableOptimizer:
         return best_solution, best_score
     
     def simulated_annealing(self, initial_temp=200, cooling_rate=0.98, iterations=1000, 
-                            neighbors_per_iter=5, max_stagnation=100, reheat_factor=1.5):
+                            neighbors_per_iter=7, max_stagnation=100, reheat_factor=1.5):
         """
         Implement enhanced simulated annealing algorithm with:
         - Multiple neighbor evaluation
