@@ -1,4 +1,4 @@
-# feup-IA-1 -> Seating Arrangement Optimizer
+# FEUP-IA-1: Seating Arrangement Optimizer
 
 A tool for optimizing seating arrangements based on guest relationships. This application implements various optimization algorithms to find the best seating arrangement that maximizes the overall happiness of guests.
 
