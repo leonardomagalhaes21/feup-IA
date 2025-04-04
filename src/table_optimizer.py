@@ -73,7 +73,7 @@ class TableOptimizer:
         
         return new_tables
     
-    def hill_climbing(self, iterations=1000, max_stagnation=100, num_neighbors=3, restarts=2):
+    def hill_climbing(self, iterations=1000, max_stagnation=100, num_neighbors=3, restarts=1):
         """
         Improved hill climbing algorithm with steepest ascent and random restarts.
         
@@ -127,7 +127,7 @@ class TableOptimizer:
         return best_solution, best_score
     
     def simulated_annealing(self, initial_temp=200, cooling_rate=0.98, iterations=1000, 
-                            neighbors_per_iter=7, max_stagnation=100, reheat_factor=1.5):
+                            neighbors_per_iter=5, max_stagnation=100, reheat_factor=1.5):
         """
         Implement enhanced simulated annealing algorithm with:
         - Multiple neighbor evaluation
@@ -145,6 +145,8 @@ class TableOptimizer:
         Returns:
             Tuple of (best solution, best score)
         """
+        # Calculate a more appropriate iterations count based on dataset size
+        adaptive_iterations = min(iterations, 300 + len(self.guests) * 2)
         
         # Start with the greedy solution for a better initial point
         current_solution = self.assign_tables_greedy()
@@ -152,32 +154,50 @@ class TableOptimizer:
         best_solution = copy.deepcopy(current_solution)
         best_score = current_score
         
-        # Run hill climbing first to get to a good starting position
-        hc_solution, hc_score = self.hill_climbing(iterations=100, max_stagnation=20, restarts=1)
-        if hc_score > best_score:
-            current_solution = hc_solution
-            current_score = hc_score
-            best_solution = copy.deepcopy(current_solution)
-            best_score = current_score
+        # Skip hill climbing warmup to save time for larger datasets
+        if len(self.guests) < 50:  # Only use hill climbing warmup for small datasets
+            hc_solution, hc_score = self.hill_climbing(iterations=50, max_stagnation=20, restarts=1)
+            if hc_score > best_score:
+                current_solution = hc_solution
+                current_score = hc_score
+                best_solution = copy.deepcopy(current_solution)
+                best_score = current_score
         
         # Improved parameters
         temperature = initial_temp
         stagnation_counter = 0
         global_stagnation = 0
-        # Lower cooling rate means slower temperature decrease = better exploration
-        # Increase number of neighbors to consider at each step
         
-        for it in tqdm(range(iterations), desc="Simulated Annealing"):
+        # Optimization: pre-calculate max temperature ratio for scaling calculations
+        max_temp_ratio = initial_temp / 100
+        
+        # Cache relationship matrix lookups for performance
+        neighbor_cache = {}
+        
+        for it in tqdm(range(adaptive_iterations), desc="Simulated Annealing"):
+            # Early stopping for efficiency
+            if temperature < 0.1 or global_stagnation > max_stagnation * 2:
+                break
+                
             # Generate multiple neighbors and pick the best one
             best_neighbor = None
             best_neighbor_score = float('-inf')
             
-            # Examine more neighbors when at higher temperatures to explore more widely
-            current_neighbors = neighbors_per_iter + int(5 * (temperature / initial_temp))
+            # Adaptive neighbors - fewer neighbors at lower temperatures to save time
+            current_neighbors = max(2, int(neighbors_per_iter * min(1.0, temperature / initial_temp)))
             
             for _ in range(current_neighbors):
                 neighbor_solution = self.get_neighbor_solution(current_solution)
-                neighbor_score = self.calculate_total_happiness(neighbor_solution)
+                
+                # Use a solution hash to avoid recalculating happiness for identical solutions
+                neighbor_hash = str(neighbor_solution)
+                if neighbor_hash in neighbor_cache:
+                    neighbor_score = neighbor_cache[neighbor_hash]
+                else:
+                    neighbor_score = self.calculate_total_happiness(neighbor_solution)
+                    # Only cache if we're not at risk of memory issues
+                    if len(neighbor_cache) < 1000:
+                        neighbor_cache[neighbor_hash] = neighbor_score
                 
                 if neighbor_score > best_neighbor_score:
                     best_neighbor = neighbor_solution
@@ -218,8 +238,9 @@ class TableOptimizer:
             else:
                 global_stagnation += 1
             
-            # Periodically try to inject diversity even when not stagnated
-            if it % 50 == 0 and random.random() < 0.3:
+            # Periodically try to inject diversity - less frequent for large datasets
+            inject_period = 50 if len(self.guests) < 50 else 100
+            if it % inject_period == 0 and random.random() < 0.3:
                 # Make a strong perturbation occasionally
                 perturbed = self._strong_perturbation(current_solution)
                 perturbed_score = self.calculate_total_happiness(perturbed)
@@ -235,17 +256,16 @@ class TableOptimizer:
                 temperature = initial_temp * 0.8  # Reheat to 80% of initial temperature
                 stagnation_counter = 0
                 
-                # Strong perturbation when reheating
+                # Strong perturbation when reheating - simpler for speed
                 current_solution = self._strong_perturbation(current_solution)
-                current_solution = self._strong_perturbation(current_solution)  # Apply twice for more diversity
                 current_score = self.calculate_total_happiness(current_solution)
             else:
-                # Slower cooling schedule
-                temperature *= cooling_rate
+                # Faster cooling for larger datasets
+                cool_rate = cooling_rate if len(self.guests) < 50 else cooling_rate * 0.99
+                temperature *= cool_rate
             
-            # Early stopping or reset if no global improvement for a long time
-            if global_stagnation >= 2 * max_stagnation:
-                # Start from best solution with perturbation rather than greedy
+            # Skip global stagnation resets for large datasets to save time
+            if len(self.guests) < 50 and global_stagnation >= 2 * max_stagnation:
                 if random.random() < 0.7:  # 70% chance to use best solution as base
                     current_solution = self._strong_perturbation(best_solution)
                 else:  # 30% chance to start fresh with greedy
@@ -254,22 +274,20 @@ class TableOptimizer:
                 current_score = self.calculate_total_happiness(current_solution)
                 temperature = initial_temp * 0.5  # Start at half temperature after reset
                 global_stagnation = 0
+        
+        # Skip final hill climbing for large datasets to save time
+        if len(self.guests) < 400:
+            # Final hill climbing phase to optimize the best solution found
+            final_solution, final_score = self.hill_climbing(
+                iterations=min(200, len(self.guests)),  # Adaptive iterations 
+                max_stagnation=100, 
+                num_neighbors=5,  # Reduced neighbors for speed
+                restarts=2
+            )
             
-            # Stop if temperature is too low and we're not finding improvements
-            if temperature < 0.01:
-                temperature = initial_temp * 0.1  # Reheat to 10% of initial temp instead of stopping
-        
-        # Final hill climbing phase to optimize the best solution found
-        final_solution, final_score = self.hill_climbing(
-            iterations=100, 
-            max_stagnation=20, 
-            num_neighbors=5, 
-            restarts=1
-        )
-        
-        if final_score > best_score:
-            best_solution = final_solution
-            best_score = final_score
+            if final_score > best_score:
+                best_solution = final_solution
+                best_score = final_score
             
         return best_solution, best_score
     
