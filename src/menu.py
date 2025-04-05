@@ -690,15 +690,15 @@ class Menu:
                         # For many tables, show values directly on pie slices without legend
                         wedges, texts, autotexts = ax_contrib.pie(
                             contribution_values, 
-                            labels=[f'Table {num}' for num in table_numbers], 
-                            autopct='%1.1f%%',  # Show percentages on pie
-                            startangle=90, 
-                            shadow=True,
-                            explode=[0.05] * len(contribution_values),  # Slightly separate all slices
+                            labels=[f'Table {num}' for num in table_numbers],
+                            autopct='%1.1f%%',
+                            startangle=90,
+                            shadow=False,
+                            explode=None,
                             wedgeprops={'edgecolor': 'white', 'linewidth': 1},
-                            textprops={'fontsize': 11}  # Regular text, not bold
+                            textprops={'fontsize': 11}
                         )
-                        # Make percentage labels visible but not bold
+                        # Make percentage labels visible
                         for autotext in autotexts:
                             autotext.set_fontsize(10)
                     else:
@@ -710,12 +710,12 @@ class Menu:
                             autopct='%1.1f%%',
                             pctdistance=0.75,
                             startangle=90, 
-                            shadow=True,
-                            explode=[0.05] * len(contribution_values),
+                            shadow=False,
+                            explode=None,
                             wedgeprops={'edgecolor': 'white', 'linewidth': 1},
-                            textprops={'fontsize': 11}  # Regular text, not bold
+                            textprops={'fontsize': 11}
                         )
-                        # Make percentage labels visible but not bold
+                        # Make percentage labels visible
                         for autotext in autotexts:
                             autotext.set_fontsize(10)
                     
