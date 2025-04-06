@@ -519,7 +519,13 @@ class Menu:
             # Create a new window
             chart_window = tk.Toplevel(self.root)
             chart_window.title(f"Algorithm Comparison - {dataset_size.capitalize()} Dataset")
-            chart_window.state('zoomed')  # Maximize window
+            
+            # Platform-specific window maximization
+            import platform
+            if platform.system() == "Windows":
+                chart_window.state('zoomed')  # For Windows
+            else:
+                chart_window.attributes('-zoomed', True)  # For Linux/Unix
             
             # Function to handle window close event
             def on_window_close():
