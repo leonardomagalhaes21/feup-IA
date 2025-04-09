@@ -29,6 +29,23 @@ A tool for optimizing seating arrangements based on guest relationships. This ap
   - **algorithm_comparison.txt**: Performance comparison of different algorithms
   - **solution_*.txt**: Detailed solution files for each algorithm
 
+
+## Screenshots
+![Main Menu](docs/Screenshot_4.png)
+*The main application interface allows selection of algorithms, parameters, and dataset sizes.*
+
+### Table Visualization
+![Table Visualization](docs/Screenshot_1.png)
+*Visualizes guest seating arrangements with relationship connections between guests. Green lines represent positive relationships, red lines show negative ones.*
+
+### Algorithm Comparison
+![Algorithm Comparison](docs/Screenshot_2.png)
+*Comparison of different algorithms showing happiness scores and execution times.*
+
+### Algorithm Details
+![Algorithm Details](docs/Screenshot_3.png)
+*Detailed breakdown of guest distribution, table happiness scores, and contribution to total happiness.*
+
 ## Requirements
 
 - Python 3.8 or higher
@@ -165,3 +182,7 @@ The application includes a comprehensive algorithm comparison tool with multiple
    - Guest distribution across tables
    - Happiness scores for each table
    - Percentage contribution of each table to the total happiness
+
+## Future Work
+
+Future enhancements could include additional visualization options such as interactive guest rearrangement and 3D seating views. Machine learning integration could help predict guest relationships based on limited input data and learn from past event arrangements to improve future optimizations.
