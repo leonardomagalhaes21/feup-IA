@@ -14,8 +14,6 @@ An intelligent seating arrangement system that optimizes guest placement at tabl
 - Support for different dataset sizes
 - Real-time happiness score calculation
 
-**Technologies:** Python, Matplotlib, Tkinter, Scikit-learn
-
 ### [Project 2: Diabetes Prediction System](Project2/README.md)
 A machine learning project that predicts diabetes risk based on patient health indicators using classification algorithms.
 
@@ -25,8 +23,6 @@ A machine learning project that predicts diabetes risk based on patient health i
 - Model performance evaluation and comparison
 - Interactive Jupyter notebook analysis
 - Visualization of prediction results
-
-**Technologies:** Python, Jupyter Notebook, Pandas, Scikit-learn, Matplotlib
 
 ## Quick Start
 
