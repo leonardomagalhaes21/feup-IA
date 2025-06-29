@@ -4,7 +4,7 @@ This repository contains two artificial intelligence projects developed for the 
 
 ## Projects Overview
 
-### [Project 1: Seating Arrangement Optimizer](Project1/README.md)
+### [Project 1: Seating Arrangement Optimizer](Project1/)
 An intelligent seating arrangement system that optimizes guest placement at tables for events using various AI optimization algorithms.
 
 **Key Features:**
@@ -14,7 +14,7 @@ An intelligent seating arrangement system that optimizes guest placement at tabl
 - Support for different dataset sizes
 - Real-time happiness score calculation
 
-### [Project 2: Diabetes Prediction System](Project2/README.md)
+### [Project 2: Diabetes Prediction System](Project2/)
 A machine learning project that predicts diabetes risk based on patient health indicators using classification algorithms.
 
 **Key Features:**
