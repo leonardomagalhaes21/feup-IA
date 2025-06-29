@@ -809,4 +809,3 @@ class TableOptimizer:
             self.tables[table_idx].append(guest_name)
         
         return self.tables
-

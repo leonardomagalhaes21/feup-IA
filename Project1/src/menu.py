@@ -31,14 +31,14 @@ class Menu:
         self.entry_table_size.insert(0, "8")
         self.entry_table_size.grid(row=0, column=1, padx=10, pady=10)
         
-        # display option
+        # Display option
         lbl_display = tk.Label(self.root, text="Display Option:")
-        lbl_display.grid(row=1, column=0, padx=10, pady=10)  # Adjusted row from 2 to 1
+        lbl_display.grid(row=1, column=0, padx=10, pady=10)
         self.combo_display = ttk.Combobox(self.root, values=["Table Visualizer"], state="readonly")
         self.combo_display.current(0)
-        self.combo_display.grid(row=1, column=1, padx=10, pady=10)  # Adjusted row from 2 to 1
+        self.combo_display.grid(row=1, column=1, padx=10, pady=10)
 
-        # Add dataset size selection
+        # Dataset size selection
         dataset_size_frame = ttk.LabelFrame(self.root, text="Dataset Size")
         dataset_size_frame.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         
@@ -55,7 +55,7 @@ class Menu:
                 command=self.update_dataset_paths
             ).pack(side=tk.LEFT, anchor="w", padx=20, pady=2)
 
-        # Add optimization algorithm options to your menu
+        # Optimization algorithm options to menu
         optimization_frame = ttk.LabelFrame(self.root, text="Optimization Algorithms")
         optimization_frame.grid(row=3, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         
@@ -101,7 +101,7 @@ class Menu:
         self.dislikes_path = tk.StringVar(value="../dataset/small/dislikes_small.csv")
         ttk.Entry(self.matrix_builder_frame, textvariable=self.dislikes_path, width=30).grid(row=2, column=1, padx=5, pady=2)
         
-        # Add a note about automatic initialization
+        # Note about automatic initialization
         note_label = ttk.Label(
             self.matrix_builder_frame, 
             text="Note: Matrix will be automatically initialized when running algorithms.",
@@ -176,15 +176,12 @@ class Menu:
             table_size = int(self.entry_table_size.get())
         except ValueError:
             table_size = 8
-        # Remove the arrangement_type variable since we removed the combo box
         display_option = self.combo_display.get()
         self.root.destroy()
-        # for now only generate seating arrangement with Random arrangement
         self.generate_seating(table_size, "Random", display_option)  # Hardcoded "Random" as arrangement_type
 
     def generate_seating(self, table_size, arrangement_type, display_option):
         print(f"Selected table size: {table_size}")
-        # We still print the arrangement type for debugging, but it will always be "Random"
         print(f"Selected arrangement type: {arrangement_type}")
         print(f"Selected display option: {display_option}")
 
@@ -290,7 +287,7 @@ class Menu:
         # Get the matrix data
         data = self.matrix_builder.get_matrix_data()
         
-        # Let's print the structure of data to debug
+        # Print the structure of data to debug
         print("Data keys:", data.keys())
         
         # Access the relationship matrix
