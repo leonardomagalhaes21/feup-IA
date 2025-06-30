@@ -37,6 +37,7 @@ pip install -r requirements.txt
 python src/main.py
 ```
 
+
 ### Project 2 - Diabetes Prediction
 ```bash
 cd Project2
